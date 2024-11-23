@@ -20,7 +20,6 @@
     </div>
 
     <div class="header-right">
-      <!-- Campo de búsqueda -->
       <div class="search-bar" @click="toggleSearch">
         <input v-if="searchActive" type="text" placeholder="Buscar..." ref="searchInput" class="search-input">
         <button class="search-icon" v-else>

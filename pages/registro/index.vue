@@ -39,7 +39,15 @@
           prepend-inner-icon="mdi-email-outline"
           variant="outlined"
         ></v-text-field>
-  
+
+        <div class="text-subtitle-1 text-medium-emphasis">Teléfono</div>
+        <v-text-field
+          v-model="phone"
+          density="compact"
+          placeholder="912345678"
+          prepend-inner-icon="mdi-phone-outline"
+          variant="outlined"
+        ></v-text-field>
         <div
           class="text-subtitle-1 text-medium-emphasis d-flex align-center justify-space-between"
         >
@@ -117,6 +125,7 @@ export default {
       visible: false,
       name: '',
       email: '',
+      phone: '',
       password: '',
       confirmPassword: '',
       errorMessage: '',
@@ -136,6 +145,7 @@ export default {
         const newUser = {
           nombre: this.name,
           email: this.email,
+          telefono: this.phone,
           contrasena: this.password,
         };
         const usuarioService = useUsuarioService();
