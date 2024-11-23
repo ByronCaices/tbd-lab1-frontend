@@ -28,7 +28,7 @@
         <v-text-field
           v-model="email"
           density="compact"
-          placeholder="ejemplo@corre.com"
+          placeholder="ejemplo@correo.com"
           prepend-inner-icon="mdi-email-outline"
           variant="outlined"
           @keyup.enter="logueo" 
