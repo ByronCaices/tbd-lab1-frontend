@@ -92,6 +92,7 @@ export default {
         telefono: "",
       },
       refreshToken: null,
+      accesToken: null,
       id_usuario: null,
       dialogEditar: false,
       clienteAEditar: null,
@@ -103,11 +104,13 @@ export default {
   },
   mounted() {
     // Obtener valores del localStorage al montar el componente
-    this.refreshToken = localStorage.getItem('refresh_token');
+    //this.refreshToken = localStorage.getItem('refresh_token');
+    this.accesToken = localStorage.getItem('accessToken');
     this.userId = parseInt(localStorage.getItem('id_usuario'), 10);
 
-    if (!this.refreshToken || !this.userId) {
+    if (!this.accesToken || !this.userId) {
       console.error("Token de refresco o ID de usuario no disponibles");
+      window.location.href = "/";
       // Maneja el error, por ejemplo, redirigiendo al login
       return;
     }
@@ -117,7 +120,7 @@ export default {
     async fetchClientes(){
       try {
         const { getAllClientes } = useClienteService();
-        const response = await getAllClientes(this.refreshToken);
+        const response = await getAllClientes();
         this.clientes = response;
       } catch (error) {
         console.error('Error al obtener los clientes:', error);
@@ -133,7 +136,7 @@ export default {
       try {
         const clienteService = useClienteService();
         //console.log('Eliminando cliente con ID:', cliente);
-        await clienteService.deleteCliente(id_cliente, this.refreshToken);
+        await clienteService.deleteCliente(id_cliente);
         console.log('Cliente eliminado en el backend.');
 
         // Elimina cliente de la lista
@@ -158,7 +161,7 @@ export default {
       try {
         const clienteService = useClienteService();
         // Actualizar el cliente en el backend
-        await clienteService.updateCliente(this.clienteAEditar, this.refreshToken);
+        await clienteService.updateCliente(this.clienteAEditar);
         // Actualizar el cliente en la lista local
         const index = this.clientes.findIndex(t => t.id_cliente === this.clienteAEditar.id_cliente);
         if (index !== -1) {

@@ -11,7 +11,7 @@ export const useUsuarioService = () => {
      * @returns El objeto Usuario creado.
      */
     const createUsuario = async (usuario: Usuario): Promise<Usuario> => {
-        const { data } = await $axiosService.post<Usuario>('/api/usuario/register', usuario);
+        const { data } = await $axiosService.post<Usuario>('/api/auth/register', usuario);
         return data;
     };
 
