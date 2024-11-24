@@ -9,11 +9,11 @@
       <!-- Menú de navegación -->
       <nav class="menu">
         <ul>
-          <li><a href="#">Productos</a></li>
-          <li><a href="#">Órdenes</a></li>
-          <li><a href="#">Clientes</a></li>
+          <li><a href="/clientes/productos">Productos</a></li>
+          <li><a href="/clientes/ordenes">Órdenes</a></li>
+          <li><a href="/clientes">Clientes</a></li>
           <li><a href="#">Empleados</a></li>
-          <li><a href="#">Informes</a></li>
+          <li><a href="/informes">Informes</a></li>
           <li><a href="#">Configuración</a></li>
         </ul>
       </nav>
