@@ -14,10 +14,15 @@
 
     <br>
 
+    
     <!-- Lista de clientes -->
     <v-container>
       <v-row>
-        <v-col v-for="cliente in clientes" :key="cliente.id_cliente" cols="12" sm="6" md="4">
+        <!-- Mostrar skeleton loader mientras se carga -->
+        <v-col cols="12" sm="6" md="4" v-if="loading" v-for="n in 6" :key="n">
+          <v-skeleton-loader type="card" color="var(--mixed-a20)"></v-skeleton-loader>
+        </v-col>
+        <v-col v-for="cliente in clientes" :key="cliente.id_cliente" cols="12" sm="6" md="4" v-else>
           <v-card :title="cliente.nombre" variant="tonal" color="var(--primary-a0)">
             <v-card-subtitle >Contacto: </v-card-subtitle>
             <v-card-text>
@@ -83,6 +88,7 @@ export default {
 
       notas: [],
       clientes: [],
+      loading: true,
       token: "your-token-here", // Puedes obtenerlo de localStorage si es necesario
       searchParams: {
         id_cliente: null,
@@ -92,6 +98,7 @@ export default {
         telefono: "",
       },
       refreshToken: null,
+      accesToken: null,
       id_usuario: null,
       dialogEditar: false,
       clienteAEditar: null,
@@ -103,11 +110,13 @@ export default {
   },
   mounted() {
     // Obtener valores del localStorage al montar el componente
-    this.refreshToken = localStorage.getItem('refresh_token');
+    //this.refreshToken = localStorage.getItem('refresh_token');
+    this.accesToken = localStorage.getItem('accessToken');
     this.userId = parseInt(localStorage.getItem('id_usuario'), 10);
 
-    if (!this.refreshToken || !this.userId) {
-      console.error("Token de refresco o ID de usuario no disponibles");
+    if (!this.accesToken || !this.userId) {
+      console.error("--- Token de refresco o ID de usuario no disponibles");
+      window.location.href = "/";
       // Maneja el error, por ejemplo, redirigiendo al login
       return;
     }
@@ -115,13 +124,16 @@ export default {
   },
   methods: {
     async fetchClientes(){
+      this.loading = true;
       try {
         const { getAllClientes } = useClienteService();
-        const response = await getAllClientes(this.refreshToken);
+        const response = await getAllClientes();
         this.clientes = response;
       } catch (error) {
         console.error('Error al obtener los clientes:', error);
-      }
+      } finally {
+      this.loading = false; // Finalizar la carga
+    }
     },
     async deleteCliente(id_cliente) {
       // Pregunta mediante notificacion de navegador, está seguro de eliminar la tarea
@@ -133,7 +145,7 @@ export default {
       try {
         const clienteService = useClienteService();
         //console.log('Eliminando cliente con ID:', cliente);
-        await clienteService.deleteCliente(id_cliente, this.refreshToken);
+        await clienteService.deleteCliente(id_cliente);
         console.log('Cliente eliminado en el backend.');
 
         // Elimina cliente de la lista
@@ -158,7 +170,7 @@ export default {
       try {
         const clienteService = useClienteService();
         // Actualizar el cliente en el backend
-        await clienteService.updateCliente(this.clienteAEditar, this.refreshToken);
+        await clienteService.updateCliente(this.clienteAEditar);
         // Actualizar el cliente en la lista local
         const index = this.clientes.findIndex(t => t.id_cliente === this.clienteAEditar.id_cliente);
         if (index !== -1) {

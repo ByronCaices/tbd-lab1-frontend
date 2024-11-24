@@ -1,37 +1,112 @@
-import axios from 'axios';
+// axios.cliente.ts
+import axios from 'axios'; // Importación de valor
+import type { AxiosError, AxiosInstance, AxiosResponse, AxiosRequestConfig } from 'axios'; // Importaciones de solo tipo
+import { defineNuxtPlugin, useRuntimeConfig } from '#app';
+import { useAuthService } from '~/services/authService';
+
+// Extiende la configuración de Axios para incluir una propiedad _retry
+interface CustomAxiosRequestConfig extends AxiosRequestConfig {
+    _retry?: boolean;
+}
 
 export default defineNuxtPlugin((nuxtApp) => {
-  // Accede a las variables de entorno
-  const config = useRuntimeConfig();
+    const config = useRuntimeConfig();
 
-  // Crear la instancia de Axios
-  const instance = axios.create({
-    baseURL: config.public.backBaseUrl, // Usamos la URL del backend desde las variables de entorno
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  });
+    const instance: AxiosInstance = axios.create({
+        baseURL: config.public.backBaseUrl,
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        withCredentials: true, // Para enviar cookies como el Refresh Token
+    });
 
-  // Interceptor para incluir el token en las solicitudes
-  /*
-  instance.interceptors.request.use(
-    (config) => {
-      const token = 'test_token'; // Aquí podrías usar un token real de tu sistema de autenticación
-      if (token) {
-        config.headers['Authorization'] = `Bearer ${token}`;
-      }
-      return config;
-    },
-    (error) => {
-      return Promise.reject(error);
+    // Inicializar el Access Token desde el almacenamiento local
+    const accessToken = localStorage.getItem('accessToken');
+    if (accessToken) {
+        instance.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
     }
-  );
-  */
 
-  // Proveer la instancia de Axios a todo el app
-  return {
-    provide: {
-      axiosService: instance,
-    },
-  };
+    // Importar el servicio de autenticación
+    const { refreshToken, redirectToLogin } = useAuthService();
+
+    // Bandera para evitar múltiples intentos de refresco simultáneos
+    let isRefreshing = false;
+    let failedQueue: Array<{
+        resolve: (token: string) => void;
+        reject: (error: any) => void;
+    }> = [];
+
+    const processQueue = (error: any, token: string | null = null) => {
+        failedQueue.forEach((prom) => {
+            if (error) {
+                prom.reject(error);
+            } else if (token) {
+                prom.resolve(token);
+            }
+        });
+
+        failedQueue = [];
+    };
+
+    // Interceptor de respuesta
+    instance.interceptors.response.use(
+        (response: AxiosResponse) => response,
+        async (error: AxiosError) => {
+            const originalRequest = error.config as CustomAxiosRequestConfig | undefined;
+
+            // Verifica si el error es 401 y si no se ha reintentado ya
+            if (error.response?.status === 403 && originalRequest && !originalRequest._retry) {
+                if (isRefreshing) {
+                    return new Promise<string>((resolve, reject) => {
+                        failedQueue.push({ resolve, reject });
+                    })
+                        .then((token) => {
+                            if (token && originalRequest.headers) {
+                                originalRequest.headers['Authorization'] = 'Bearer ' + token;
+                                return instance(originalRequest);
+                            }
+                            return Promise.reject(error);
+                        })
+                        .catch((err) => {
+                            return Promise.reject(err);
+                        });
+                }
+
+                originalRequest._retry = true;
+                isRefreshing = true;
+
+                return new Promise<string | void>(async (resolve, reject) => {
+                    try {
+                        const newToken = await refreshToken();
+                        if (newToken) {
+                            instance.defaults.headers.common['Authorization'] = `Bearer ${newToken}`;
+                            if (originalRequest.headers) {
+                                originalRequest.headers['Authorization'] = `Bearer ${newToken}`;
+                            }
+                            processQueue(null, newToken);
+                            resolve(instance(originalRequest));
+                        } else {
+                            processQueue(new Error('No se pudo obtener un nuevo token'), null);
+                            reject(error);
+                        }
+                    } catch (err) {
+                        processQueue(err, null);
+                        redirectToLogin();
+                        reject(err);
+                    } finally {
+                        isRefreshing = false;
+                    }
+                });
+            }
+
+            return Promise.reject(error);
+        }
+    );
+
+    // Proveer la instancia de Axios a toda la app
+    return {
+        provide: {
+            axiosService: instance,
+        },
+    };
 });
