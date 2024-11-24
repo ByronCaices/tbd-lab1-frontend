@@ -13,7 +13,7 @@
           <li><a href="/clientes/ordenes">Ordenes</a></li>
           <li><a href="/clientes">Clientes</a></li>
           <li><a href="#">Empleados</a></li>
-          <li><a href="#">Informes</a></li>
+          <li><a href="/informes">Informes</a></li>
           <li><a href="#">Configuración</a></li>
         </ul>
       </nav>
