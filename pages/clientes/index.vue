@@ -3,47 +3,37 @@
   <Header />
 
   <div class="background">
-    <h1 class="lexend-deca-title">My To Do List</h1>
+    <h1 class="lexend-deca-title">CLIENTES</h1>
 
-    <!-- Botón para añadir tareas -->
-    <div class="boton-tareas">
+    <!-- Botón para añadir clientes -->
+    <div class="boton-clientes">
       <v-btn color="#e29818ff" size="small" variant="tonal" class="boton-chico" @click="irAAñadir">
-        Añadir tareas
+        Añadir Cliente
       </v-btn>
     </div>
 
-    <!-- Lista de tareas -->
+    <br>
+
+    <!-- Lista de clientes -->
     <v-container>
-      <!-- Control de filtro -->
-
-      <v-select clearable chips v-model="filtro" :items="['todas', 'pendientes', 'completadas']" label="Mostrar tareas"
-        variant="outlined" class="mb-4" color="#ff0000" base-color="#f0f0f0" bg-color="#5BC0BE"/>
-
       <v-row>
-        <v-col v-for="tarea in tareasFiltradas" :key="tarea.id_nota" cols="12" sm="6" md="4">
-          <v-card :title="tarea.nombre_nota" variant="tonal" :color="tarea.completa_check_nota ? 'green' : 'red'"
-            :loading="isExpiringSoon(tarea)">
-            <v-card-subtitle>Deadline: {{ tarea.fecha_nota }}</v-card-subtitle>
+        <v-col v-for="cliente in clientes" :key="cliente.id_cliente" cols="12" sm="6" md="4">
+          <v-card :title="cliente.nombre" variant="tonal" color="var(--primary-a0)">
+            <v-card-subtitle >Contacto: </v-card-subtitle>
             <v-card-text>
-              {{ tarea.contenido_nota }}
-              <v-alert v-if="isExpiringSoon(tarea)" type="info" density="compact" variant="tonal"
-                class="mt-2">
-                ¡Esta tarea expira en menos de 24 hrs!
-              </v-alert>
+              {{ cliente.email }}
+              <br>
+              {{ cliente.telefono }}
+              <br>
+              {{ cliente.direccion }}
             </v-card-text>
             <v-card-actions>
-              <!-- Botón para marcar como completada o pendiente -->
-              <v-btn icon @click="toggleCompleta(tarea)">
-                <v-icon>{{ tarea.completa_check_nota ? 'mdi-checkbox-marked' : 'mdi-checkbox-blank-outline' }}</v-icon>
-              </v-btn>
-
-              <!-- Botón para editar la tarea -->
-              <v-btn icon @click="editarTarea(tarea)">
+              <!-- Botón para editar el cliente -->
+              <v-btn icon @click="editarCliente(cliente)">
                 <v-icon>mdi-pencil</v-icon>
               </v-btn>
-
-              <!-- Botón para eliminar la tarea -->
-              <v-btn icon @click="deleteTarea(tarea.id_nota)">
+              <!-- Botón para eliminar el cliente -->
+              <v-btn icon @click="deleteCliente(cliente.id_cliente)">
                 <v-icon>mdi-delete</v-icon>
               </v-btn>
             </v-card-actions>
@@ -54,13 +44,14 @@
       <v-dialog v-model="dialogEditar" max-width="500px">
         <v-card>
           <v-card-title>
-            <span class="headline">Editar Tarea</span>
+            <span class="headline">Editar Cliente</span>
           </v-card-title>
           <v-card-text>
             <v-form ref="formEditar">
-              <v-text-field label="Nombre" v-model="tareaAEditar.nombre_nota"></v-text-field>
-              <v-textarea label="Contenido" v-model="tareaAEditar.contenido_nota"></v-textarea>
-              <v-text-field v-model="tareaAEditar.fecha_nota" label="Fecha" type="date"></v-text-field>
+              <v-text-field label="Nombre" v-model="clienteAEditar.nombre"></v-text-field>
+              <v-text-field label="Dirección" v-model="clienteAEditar.direccion"></v-text-field>
+              <v-text-field label="Email" v-model="clienteAEditar.email"></v-text-field>
+              <v-text-field label="Teléfono" v-model="clienteAEditar.telefono"></v-text-field>
             </v-form>
           </v-card-text>
           <v-card-actions>
@@ -73,52 +64,17 @@
 
     </v-container>
 
-
-
-    <div class="tareas">
-      <v-list>
-        <v-list-item v-for="(nota, index) in notas" :key="index" class="d-flex align-center justify-space-between">
-          <v-card class="mx-auto pa-4 mt-2 mb-3" elevation="8" rounded="lg"
-            :color="nota.completa_check_nota ? '#e8f5e9' : '#ffebee'">
-            <div class="d-flex justify-between">
-              <div>
-                <div class="font-weight-bold">{{ nota.nombre_notas }}</div>
-                <div class="text-caption">Fecha: {{ nota.fecha_nota }}</div>
-                <div class="text-body-1">{{ nota.contenido_nota }}</div>
-              </div>
-              <div class="d-flex align-center">
-                <v-chip :color="nota.completa_check_nota ? 'green' : 'red'" class="ma-2" small>
-                  {{ nota.completa_check_nota ? 'COMPLETADO' : 'PENDIENTE' }}
-                </v-chip>
-              </div>
-            </div>
-            <v-spacer></v-spacer>
-            <div class="boton-editar-eliminar d-flex justify-between mt-4">
-              <v-btn class="mx-2 px-4" color="#E29818FF" size="small" outlined @click="completarTarea(index)">
-                Completar tarea
-              </v-btn>
-              <v-btn class="mx-2 px-4" color="#E29818FF" size="small" outlined @click="editarTarea(index)">
-                Editar tarea
-              </v-btn>
-              <v-btn class="mx-2" color="red darken-1" size="small" outlined @click="eliminarTarea(index)">
-                Eliminar tarea
-              </v-btn>
-            </div>
-          </v-card>
-        </v-list-item>
-      </v-list>
-    </div>
   </div>
 
 </template>
 
 <script>
 import { useRouter } from "vue-router";
-import { useNotaService } from "~/services/notaService";
+import { useClienteService } from "~/services/clienteService";
 import Header from "@/components/Header.vue"; // Ajusta la ruta según tu estructura de archivos
 
 export default {
-  name: "Tareas",
+  name: "Clientes",
   components: {
     Header,
   },
@@ -126,153 +82,99 @@ export default {
     return {
 
       notas: [],
-      tareas: [],
+      clientes: [],
       token: "your-token-here", // Puedes obtenerlo de localStorage si es necesario
       searchParams: {
-        nombre_nota: "",
-        contenido_nota: "",
-        completa_check_nota: null,
-        id_usuario: null, // Se asignará en mounted()
+        id_cliente: null,
+        nombre: "",
+        direccion: "",
+        email: "",
+        telefono: "",
       },
-      estadoOptions: [
-        { text: "Todos", value: null },
-        { text: "Completadas", value: true },
-        { text: "Pendientes", value: false },
-      ],
       refreshToken: null,
+      accesToken: null,
       id_usuario: null,
-      filtro: "todas",
       dialogEditar: false,
-      tareaAEditar: null,
+      clienteAEditar: null,
       menuFecha: false, // Para el date picker
 
     };
   },
   computed: {
-    tareasFiltradas() {
-      if (this.filtro === 'todas') {
-        return this.tareas;
-      } else if (this.filtro === 'pendientes') {
-        return this.tareas.filter(tarea => !tarea.completa_check_nota);
-      } else if (this.filtro === 'completadas') {
-        return this.tareas.filter(tarea => tarea.completa_check_nota);
-      }
-    },
   },
   mounted() {
     // Obtener valores del localStorage al montar el componente
-    this.refreshToken = localStorage.getItem('refresh_token');
+    //this.refreshToken = localStorage.getItem('refresh_token');
+    this.accesToken = localStorage.getItem('accessToken');
     this.userId = parseInt(localStorage.getItem('id_usuario'), 10);
 
-    if (!this.refreshToken || !this.userId) {
+    if (!this.accesToken || !this.userId) {
       console.error("Token de refresco o ID de usuario no disponibles");
+      window.location.href = "/";
       // Maneja el error, por ejemplo, redirigiendo al login
       return;
     }
-    this.fetchTareasByUser(); // Cargar tareas del usuario
+    this.fetchClientes(); // Cargar clientes
   },
   methods: {
-    async fetchTareasByUser() {
+    async fetchClientes(){
       try {
-        const { getNotasByUserId } = useNotaService();
-        console.log('fetchTareasByUser', this.userId, this.refreshToken);
-        const response = await getNotasByUserId(this.userId, this.refreshToken);
-
-        console.log('Response from API:', response);
-
-        this.tareas = response;
+        const { getAllClientes } = useClienteService();
+        const response = await getAllClientes();
+        this.clientes = response;
       } catch (error) {
-        console.error('Error al obtener las notas:', error);
+        console.error('Error al obtener los clientes:', error);
       }
-      console.log('Tareas:', this.tareas);
     },
-    async deleteTarea(id_nota) {
+    async deleteCliente(id_cliente) {
       // Pregunta mediante notificacion de navegador, está seguro de eliminar la tarea
-      const isConfirmed = window.confirm("¿Estás seguro de eliminar la tarea?");
+      const isConfirmed = window.confirm("¿Estás seguro de eliminar el cliente?\nConsidere que eliminar un cliente con alguna orden activa no se concretará.");
       if (!isConfirmed) {
         return;
       }
 
       try {
-        const notaService = useNotaService();
-        console.log('Eliminando tarea con ID:', id_nota);
-        await notaService.deleteNota(id_nota, this.refreshToken);
-        console.log('Tarea eliminada en el backend.');
+        const clienteService = useClienteService();
+        //console.log('Eliminando cliente con ID:', cliente);
+        await clienteService.deleteCliente(id_cliente);
+        console.log('Cliente eliminado en el backend.');
 
-        // Elimina la tarea de la lista
-        const index = this.tareas.findIndex(t => t.id_nota === id_nota);
+        // Elimina cliente de la lista
+        const index = this.clientes.findIndex(t => t.id_cliente === id_cliente);
         if (index !== -1) {
-          console.log('Eliminando tarea del frontend en el índice:', index);
-          this.tareas.splice(index, 1);
-          console.log('Tareas actuales:', this.tareas);
+          console.log('Eliminando cliente del frontend en el índice:', index);
+          this.clientes.splice(index, 1);
+          console.log('Clientes actuales:', this.clientes);
         }
       } catch (error) {
-        console.error('Error al eliminar la tarea:', error);
-      }
-      //window.location.reload();
-    },
-    isExpiringSoon(tarea) {
-      if (tarea.completa_check_nota) {
-        return false; // Si la tarea está completada, no está por expirar
-      }
-      const now = new Date();
-      const dueDate = new Date(tarea.fecha_nota);
-      const timeDiff = dueDate - now;
-      return timeDiff > 0 && timeDiff <= 24 * 60 * 60 * 1000; // 24 horas en milisegundos
-    },
-    irAAñadir() {
-      this.$router.push("/tareas/nueva");
-    },
-    completarTarea(index) {
-      this.notas[index].completa_check_nota = true;
-      const { updateNota } = useNotaService();
-      updateNota(this.notas[index], this.refreshToken)
-        .then(() => {
-          // Opcional: actualizar la lista o mostrar una notificación
-        })
-        .catch((error) => {
-          console.error("Error al completar la tarea:", error);
-        });
-    },
-    editarTarea(index) {
-      // Implementa la lógica para editar la tarea, por ejemplo, navegando a una ruta de edición
-      const notaId = this.notas[index].id;
-      this.$router.push(`/tareas/editar/${notaId}`);
-    },
-    async toggleCompleta(tarea) {
-      try {
-        const notaService = useNotaService();
-        // Invertir el estado de 'completa_check_nota'
-        tarea.completa_check_nota = !tarea.completa_check_nota;
-        // Actualizar la tarea en el backend
-        await notaService.updateNota(tarea, this.refreshToken);
-      } catch (error) {
-        console.error('Error al actualizar el estado de la tarea:', error);
+        console.error('Error al eliminar el cliente:', error);
       }
       //window.location.reload();
     },
 
-    editarTarea(tarea) {
+    editarCliente(cliente) {
       // Crear una copia de la tarea para evitar modificarla directamente
-      this.tareaAEditar = { ...tarea };
+      this.clienteAEditar = { ...cliente };
       this.dialogEditar = true;
     },
-
-    async guardarEdicion() {
+    async guardarEdicion(){
       try {
-        const notaService = useNotaService();
-        // Actualizar la tarea en el backend
-        await notaService.updateNota(this.tareaAEditar, this.refreshToken);
-        // Actualizar la tarea en la lista local
-        const index = this.tareas.findIndex(t => t.id_nota === this.tareaAEditar.id_nota);
+        const clienteService = useClienteService();
+        // Actualizar el cliente en el backend
+        await clienteService.updateCliente(this.clienteAEditar);
+        // Actualizar el cliente en la lista local
+        const index = this.clientes.findIndex(t => t.id_cliente === this.clienteAEditar.id_cliente);
         if (index !== -1) {
-          this.tareas.splice(index, 1, this.tareaAEditar);
+          this.clientes.splice(index, 1, this.clienteAEditar);
         }
         this.dialogEditar = false;
       } catch (error) {
         console.error('Error al guardar la edición:', error);
       }
-      //  window.location.reload();
+
+    },
+    irAAñadir() {
+      this.$router.push("/clientes/nuevo");
     },
   },
 };
@@ -316,7 +218,7 @@ nav {
   margin-right: 5px;
 }
 
-.boton-tareas {
+.boton-clientes {
   display: flex;
   justify-content: center;
   margin-right: 20px;
@@ -330,11 +232,11 @@ nav {
   text-transform: uppercase;
 }
 
-.tareas {
+.clientes {
   padding: 20px;
 }
 
-.tareas h1 {
+.clientes h1 {
   font-size: 24px;
   margin-bottom: 10px;
 }
@@ -364,7 +266,7 @@ nav {
 .lexend-deca-title {
   font-family: "Lexend Deca", sans-serif;
   font-optical-sizing: auto;
-  color: #4CAF50;
+  color: var(--primary-a0);
   font-weight: 700;
   font-size: 4.25rem;
   font-style: normal;

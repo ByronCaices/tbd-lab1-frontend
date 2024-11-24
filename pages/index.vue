@@ -116,10 +116,10 @@ export default {
     async logueo() {
       try {
         const authService = useAuthService();
-        const { access_token, refresh_token, id_usuario } = await authService.authenticate(this.email, this.password);
+        const { access_token, id_usuario } = await authService.authenticate(this.email, this.password);
 
-        localStorage.setItem('access_token', access_token);
-        localStorage.setItem('refresh_token', refresh_token);
+        localStorage.setItem('accessToken', access_token);
+        //localStorage.setItem('refresh_token', refresh_token);
         localStorage.setItem('id_usuario', id_usuario);
 
         this.$router.push('/tareas');

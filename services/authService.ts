@@ -1,17 +1,20 @@
+// services/authService.ts
 import { useNuxtApp } from "#app";
+import axios from 'axios';
+import type { AxiosResponse } from 'axios';
+
+interface TokenResponse {
+    accessToken: string;
+    refreshToken: string;
+    id_usuario: number;
+}
 
 export const useAuthService = () => {
     const { $axiosService } = useNuxtApp();
 
-    interface TokenResponse {
-        accessToken: string;
-        refreshToken: string;
-        id_usuario: number;
-    }
-
     /**
-     * Autentiaca un usuario.
-     * @param email - Correo del usuario.
+     * Autentica un usuario.
+     * @param username - Nombre de usuario.
      * @param password - Contraseña del usuario.
      * @returns El objeto con el token de autenticación y el refresh token.
      */
@@ -19,11 +22,55 @@ export const useAuthService = () => {
         const { data } = await $axiosService.post<TokenResponse>("/api/auth/login", {
             username,
             password
-        });
+        }, { withCredentials: true }); // Asegura que se envíen las cookies
+        // Almacenar el Access Token
+        localStorage.setItem('accessToken', data.accessToken);
+        // Configurar el header Authorization
+        $axiosService.defaults.headers.common['Authorization'] = `Bearer ${data.accessToken}`;
         return data;
     };
 
-    return {
-        authenticate
+    /**
+     * Refresca el Access Token usando el Refresh Token almacenado en las cookies.
+     * @returns El nuevo Access Token.
+     */
+    const refreshToken = async (): Promise<string> => {
+        try {
+            // Se asume que el Refresh Token está en una cookie HTTP-only
+            const response: AxiosResponse<TokenResponse> = await $axiosService.post<TokenResponse>("/api/auth/refresh", {}, { withCredentials: true });
+            const newAccessToken = response.data.accessToken;
+            // Actualizar el Access Token en localStorage
+            localStorage.setItem('accessToken', newAccessToken);
+            // Actualizar el header Authorization
+            $axiosService.defaults.headers.common['Authorization'] = `Bearer ${newAccessToken}`;
+            return newAccessToken;
+        } catch (error) {
+            console.error('Error al refrescar el token:', error);
+            redirectToLogin();
+            throw error;
+        }
     };
-}
+
+    /**
+     * Redirige al usuario a la página de login.
+     */
+    const redirectToLogin = () => {
+        window.location.href = '/'; // Ajusta la ruta según tu configuración
+    };
+
+    /**
+     * Cierra la sesión del usuario eliminando el Access Token y redirigiendo al login.
+     */
+    const logout = () => {
+        localStorage.removeItem('accessToken');
+        // Opcional: también puedes eliminar otras informaciones de usuario aquí
+        redirectToLogin();
+    };
+
+    return {
+        authenticate,
+        refreshToken,
+        redirectToLogin,
+        logout
+    };
+};
