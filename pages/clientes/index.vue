@@ -14,10 +14,15 @@
 
     <br>
 
+    
     <!-- Lista de clientes -->
     <v-container>
       <v-row>
-        <v-col v-for="cliente in clientes" :key="cliente.id_cliente" cols="12" sm="6" md="4">
+        <!-- Mostrar skeleton loader mientras se carga -->
+        <v-col cols="12" sm="6" md="4" v-if="loading" v-for="n in 6" :key="n">
+          <v-skeleton-loader type="card" color="var(--mixed-a20)"></v-skeleton-loader>
+        </v-col>
+        <v-col v-for="cliente in clientes" :key="cliente.id_cliente" cols="12" sm="6" md="4" v-else>
           <v-card :title="cliente.nombre" variant="tonal" color="var(--primary-a0)">
             <v-card-subtitle >Contacto: </v-card-subtitle>
             <v-card-text>
@@ -65,7 +70,6 @@
     </v-container>
 
   </div>
-
 </template>
 
 <script>
@@ -83,6 +87,7 @@ export default {
 
       notas: [],
       clientes: [],
+      loading: true,
       token: "your-token-here", // Puedes obtenerlo de localStorage si es necesario
       searchParams: {
         id_cliente: null,
@@ -109,7 +114,7 @@ export default {
     this.userId = parseInt(localStorage.getItem('id_usuario'), 10);
 
     if (!this.accesToken || !this.userId) {
-      console.error("Token de refresco o ID de usuario no disponibles");
+      console.error("--- Token de refresco o ID de usuario no disponibles");
       window.location.href = "/";
       // Maneja el error, por ejemplo, redirigiendo al login
       return;
@@ -118,13 +123,16 @@ export default {
   },
   methods: {
     async fetchClientes(){
+      this.loading = true;
       try {
         const { getAllClientes } = useClienteService();
         const response = await getAllClientes();
         this.clientes = response;
       } catch (error) {
         console.error('Error al obtener los clientes:', error);
-      }
+      } finally {
+      this.loading = false; // Finalizar la carga
+    }
     },
     async deleteCliente(id_cliente) {
       // Pregunta mediante notificacion de navegador, está seguro de eliminar la tarea
@@ -180,95 +188,92 @@ export default {
 };
 </script>
 
-
-
 <style scoped>
 .background {
-  background-color: #282828;
-  min-height: 100vh;
-  margin-top: 40px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  /* Centra horizontalmente */
-  justify-content: flex-start;
-  /* No centra verticalmente, coloca los elementos al inicio */
+	background-color: #282828;
+	min-height: 100vh;
+	margin-top: 40px;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	/* Centra horizontalmente */
+	justify-content: flex-start;
+	/* No centra verticalmente, coloca los elementos al inicio */
 }
 
-
 header h1 {
-  margin-left: 20px;
-  margin-top: 20px;
-  font-size: 2.25rem;
-  font-weight: bold;
-  text-transform: uppercase;
+	margin-left: 20px;
+	margin-top: 20px;
+	font-size: 2.25rem;
+	font-weight: bold;
+	text-transform: uppercase;
 }
 
 nav {
-  display: flex;
-  height: 50px;
-  gap: 10px;
-  margin-top: 15px;
-  margin-right: 20px;
+	display: flex;
+	height: 50px;
+	gap: 10px;
+	margin-top: 15px;
+	margin-right: 20px;
 }
 
 .img-notif {
-  width: 20px;
-  height: 20px;
-  margin-right: 5px;
+	width: 20px;
+	height: 20px;
+	margin-right: 5px;
 }
 
 .boton-clientes {
-  display: flex;
-  justify-content: center;
-  margin-right: 20px;
-  margin-top: 20px;
+	display: flex;
+	justify-content: center;
+	margin-right: 20px;
+	margin-top: 20px;
 }
 
 .boton-chico {
-  font-size: 14px;
-  padding: 6px 12px;
-  min-width: 100px;
-  text-transform: uppercase;
+	font-size: 14px;
+	padding: 6px 12px;
+	min-width: 100px;
+	text-transform: uppercase;
 }
 
 .clientes {
-  padding: 20px;
+	padding: 20px;
 }
 
 .clientes h1 {
-  font-size: 24px;
-  margin-bottom: 10px;
+	font-size: 24px;
+	margin-bottom: 10px;
 }
 
 .COMPLETADO {
-  background-color: #e8f5e9;
-  border-left: 4px solid #4caf50;
+	background-color: #e8f5e9;
+	border-left: 4px solid #4caf50;
 }
 
 .PENDIENTE {
-  background-color: #ffebee;
-  border-left: 4px solid #f44336;
+	background-color: #ffebee;
+	border-left: 4px solid #f44336;
 }
 
 .boton-editar-eliminar {
-  display: flex;
-  justify-content: space-between;
-  gap: 10px;
+	display: flex;
+	justify-content: space-between;
+	gap: 10px;
 }
 
 .search-section {
-  width: 100%;
-  max-width: 1200px;
-  margin: 20px auto;
+	width: 100%;
+	max-width: 1200px;
+	margin: 20px auto;
 }
 
 .lexend-deca-title {
-  font-family: "Lexend Deca", sans-serif;
-  font-optical-sizing: auto;
-  color: var(--primary-a0);
-  font-weight: 700;
-  font-size: 4.25rem;
-  font-style: normal;
+	font-family: "Lexend Deca", sans-serif;
+	font-optical-sizing: auto;
+	color: var(--primary-a0);
+	font-weight: 700;
+	font-size: 4.25rem;
+	font-style: normal;
 }
 </style>

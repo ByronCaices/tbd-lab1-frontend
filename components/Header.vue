@@ -9,8 +9,8 @@
       <!-- Menú de navegación -->
       <nav class="menu">
         <ul>
-          <li><a href="#">Productos</a></li>
-          <li><a href="#">Órdenes</a></li>
+          <li><a href="/productos">Productos</a></li>
+          <li><a href="/clientes/ordenes">Ordenes</a></li>
           <li><a href="/clientes">Clientes</a></li>
           <li><a href="#">Empleados</a></li>
           <li><a href="#">Informes</a></li>
