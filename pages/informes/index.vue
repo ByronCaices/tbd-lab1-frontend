@@ -12,14 +12,14 @@
       <v-container>
         <v-row>
           <!--Contenedor con enlace a reporte queris-->
-          <v-card class="mx-auto" max-width="400" link>
+          <v-card class="mx-auto" max-width="400" link color="var(--primary-a20)">
             <v-img
               class="align-end text-white"
               height="200"
-              src="/assets/citiaps.png"
+              src="/assets/logoreporte1.png"
               cover
             >
-              <v-card-title  class="bg-purple-lighten-2">
+              <v-card-title class="bg-primary-a40 title-background">
                 <v-icon class="me-4" icon="mdi-email-outline" size="large"></v-icon>
                 Reporte Querys</v-card-title>
             </v-img>
@@ -33,14 +33,14 @@
             </v-card-actions>
           </v-card>
           <!--Contenedor con reporte clientes con más de una compra en un dia-->
-          <v-card class="mx-auto" max-width="400">
+          <v-card class="mx-auto" max-width="400" color="var(--primary-a20)">
             <v-img
               class="align-end text-white"
               height="200"
-              src="/assets/citiaps.png"
+              src="/assets/logoreporte2.png"
               cover
             >
-              <v-card-title  class="bg-purple-lighten-2">
+              <v-card-title  class="bg-primary-a40 title-background">
                 <v-icon icon="mdi-account-multiple-outline" size="large"></v-icon>
                 Reporte Clientes Compras
 
@@ -266,5 +266,8 @@
     font-size: 4.25rem;
     font-style: normal;
   }
+
+  .title-background {
+    background-color: rgba(0, 0, 0, 0.5); /* Adjust the color and opacity as needed */
+  }
   </style>
-  
