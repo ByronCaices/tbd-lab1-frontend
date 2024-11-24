@@ -70,7 +70,6 @@
     </v-container>
 
   </div>
-
 </template>
 
 <script>
@@ -189,95 +188,92 @@ export default {
 };
 </script>
 
-
-
 <style scoped>
 .background {
-  background-color: #282828;
-  min-height: 100vh;
-  margin-top: 40px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  /* Centra horizontalmente */
-  justify-content: flex-start;
-  /* No centra verticalmente, coloca los elementos al inicio */
+	background-color: #282828;
+	min-height: 100vh;
+	margin-top: 40px;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	/* Centra horizontalmente */
+	justify-content: flex-start;
+	/* No centra verticalmente, coloca los elementos al inicio */
 }
 
-
 header h1 {
-  margin-left: 20px;
-  margin-top: 20px;
-  font-size: 2.25rem;
-  font-weight: bold;
-  text-transform: uppercase;
+	margin-left: 20px;
+	margin-top: 20px;
+	font-size: 2.25rem;
+	font-weight: bold;
+	text-transform: uppercase;
 }
 
 nav {
-  display: flex;
-  height: 50px;
-  gap: 10px;
-  margin-top: 15px;
-  margin-right: 20px;
+	display: flex;
+	height: 50px;
+	gap: 10px;
+	margin-top: 15px;
+	margin-right: 20px;
 }
 
 .img-notif {
-  width: 20px;
-  height: 20px;
-  margin-right: 5px;
+	width: 20px;
+	height: 20px;
+	margin-right: 5px;
 }
 
 .boton-clientes {
-  display: flex;
-  justify-content: center;
-  margin-right: 20px;
-  margin-top: 20px;
+	display: flex;
+	justify-content: center;
+	margin-right: 20px;
+	margin-top: 20px;
 }
 
 .boton-chico {
-  font-size: 14px;
-  padding: 6px 12px;
-  min-width: 100px;
-  text-transform: uppercase;
+	font-size: 14px;
+	padding: 6px 12px;
+	min-width: 100px;
+	text-transform: uppercase;
 }
 
 .clientes {
-  padding: 20px;
+	padding: 20px;
 }
 
 .clientes h1 {
-  font-size: 24px;
-  margin-bottom: 10px;
+	font-size: 24px;
+	margin-bottom: 10px;
 }
 
 .COMPLETADO {
-  background-color: #e8f5e9;
-  border-left: 4px solid #4caf50;
+	background-color: #e8f5e9;
+	border-left: 4px solid #4caf50;
 }
 
 .PENDIENTE {
-  background-color: #ffebee;
-  border-left: 4px solid #f44336;
+	background-color: #ffebee;
+	border-left: 4px solid #f44336;
 }
 
 .boton-editar-eliminar {
-  display: flex;
-  justify-content: space-between;
-  gap: 10px;
+	display: flex;
+	justify-content: space-between;
+	gap: 10px;
 }
 
 .search-section {
-  width: 100%;
-  max-width: 1200px;
-  margin: 20px auto;
+	width: 100%;
+	max-width: 1200px;
+	margin: 20px auto;
 }
 
 .lexend-deca-title {
-  font-family: "Lexend Deca", sans-serif;
-  font-optical-sizing: auto;
-  color: var(--primary-a0);
-  font-weight: 700;
-  font-size: 4.25rem;
-  font-style: normal;
+	font-family: "Lexend Deca", sans-serif;
+	font-optical-sizing: auto;
+	color: var(--primary-a0);
+	font-weight: 700;
+	font-size: 4.25rem;
+	font-style: normal;
 }
 </style>
