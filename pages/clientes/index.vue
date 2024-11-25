@@ -47,16 +47,16 @@
       </v-row>
 
       <v-dialog v-model="dialogEditar" max-width="500px">
-        <v-card>
+        <v-card variant="elevated" color="var(--surface-a40)">
           <v-card-title>
             <span class="headline">Editar Cliente</span>
           </v-card-title>
           <v-card-text>
             <v-form ref="formEditar">
-              <v-text-field label="Nombre" v-model="clienteAEditar.nombre"></v-text-field>
-              <v-text-field label="Dirección" v-model="clienteAEditar.direccion"></v-text-field>
-              <v-text-field label="Email" v-model="clienteAEditar.email"></v-text-field>
-              <v-text-field label="Teléfono" v-model="clienteAEditar.telefono"></v-text-field>
+              <v-text-field label="Nombre" color="var(--primary-a0)" v-model="clienteAEditar.nombre" ></v-text-field>
+              <v-text-field label="Dirección" color="var(--primary-a0)" v-model="clienteAEditar.direccion"></v-text-field>
+              <v-text-field label="Email" color="var(--primary-a0)" v-model="clienteAEditar.email"></v-text-field>
+              <v-text-field label="Teléfono" color="var(--primary-a0)" v-model="clienteAEditar.telefono"></v-text-field>
             </v-form>
           </v-card-text>
           <v-card-actions>
@@ -66,6 +66,28 @@
           </v-card-actions>
         </v-card>
       </v-dialog>
+
+      <v-dialog v-model="dialogCrear" max-width="500px">
+        <v-card variant="elevated" color="var(--surface-a40)">
+          <v-card-title>
+            <span class="headline">Crear Cliente</span>
+          </v-card-title>
+          <v-card-text>
+            <v-form ref="formEditar">
+              <v-text-field label="Nombre" color="var(--primary-a0)" v-model="newCliente.nombre" ></v-text-field>
+              <v-text-field label="Dirección" color="var(--primary-a0)" v-model="newCliente.direccion"></v-text-field>
+              <v-text-field label="Email" color="var(--primary-a0)" v-model="newCliente.email"></v-text-field>
+              <v-text-field label="Teléfono" color="var(--primary-a0)" v-model="newCliente.telefono"></v-text-field>
+            </v-form>
+          </v-card-text>
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn color="red darken-1" text @click="dialogCrear = false">Cancelar</v-btn>
+            <v-btn color="green darken-1" text @click="guardarCreacion">Crear</v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
+
 
     </v-container>
 
@@ -86,6 +108,13 @@ export default {
     return {
 
       notas: [],
+      newCliente: {
+        id_cliente: null,
+        nombre: "",
+        direccion: "",
+        email: "",
+        telefono: "",
+      },
       clientes: [],
       loading: true,
       token: "your-token-here", // Puedes obtenerlo de localStorage si es necesario
@@ -100,6 +129,7 @@ export default {
       accesToken: null,
       id_usuario: null,
       dialogEditar: false,
+      dialogCrear: false,
       clienteAEditar: null,
       menuFecha: false, // Para el date picker
 
@@ -181,14 +211,30 @@ export default {
       }
 
     },
+    async guardarCreacion(){
+      try {
+        const clienteService = useClienteService();
+        // Crear el cliente en el backend
+        const newCliente = await clienteService.createCliente(this.newCliente);
+        // Agregar el cliente a la lista local
+        this.clientes.push(newCliente);
+        this.dialogCrear = false;
+      } catch (error) {
+        console.error('Error al guardar la creación:', error);
+      }
+    },
     irAAñadir() {
-      this.$router.push("/clientes/nuevo");
+      this.dialogCrear = true;
+      console.log('Añadir cliente');
     },
   },
 };
 </script>
 
 <style scoped>
+.v-card {
+  color: white; /* Cambia este color según lo que necesites */
+}
 .background {
 	background-color: #282828;
 	min-height: 100vh;
