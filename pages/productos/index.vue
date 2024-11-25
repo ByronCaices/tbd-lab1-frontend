@@ -7,100 +7,225 @@
     <!-- Botón para añadir clientes -->
     <div class="boton-clientes">
       <v-btn color="#e29818ff" size="small" variant="tonal" class="boton-chico" @click="irAAñadir">
-        Añadir Cliente
+        Añadir Producto
       </v-btn>
     </div>
 
     <br>
 
     <div class="table-container" v-if="productos && productos.length > 0">
-    <table class="invoice-table">
-      <thead>
-        <tr>
-          <th>Edit</th>
-          <th>SKU</th>
-          <th>Nombre</th>
-          <th>Descripción</th>
-          <th>Precio</th>
-          <th>Stock</th>
-          <th>Estado</th>
-          <th>Categoría</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="(producto, index) in productos" :key="index">
-          <td><button id="btnToWatch" class="btn new-btn" @click="goToWatch(producto.id_producto)">✏️</button></td>
-          <td>{{ producto.id_producto }}</td>
-          <td>{{ producto.nombre }}      </td>
-          <td>{{ producto.descripcion }}</td>
-          <td>{{ producto.precio }}</td>
-          <td>{{ producto.stock }}</td>
-          <td>{{ producto.estado }}</td>
-          <td>{{ producto.id_categoria }}</td>
-        </tr>
-      </tbody>
-    </table>
+      <table class="invoice-table">
+        <thead>
+          <tr>
+            <th>Edit</th>
+            <th>SKU</th>
+            <th>Nombre</th>
+            <th>Descripción</th>
+            <th>Precio Unitario</th>
+            <th>Stock</th>
+            <th>Estado</th>
+            <th>Categoría</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="(producto, index) in productos" :key="index">
+            <td><button id="btnToWatch" class="btn new-btn" @click="updateProducto(producto)">✏️</button></td>
+            <td>{{ producto.id_producto }}</td>
+            <td>{{ producto.nombre }} </td>
+            <td>{{ producto.descripcion }}</td>
+            <td>{{ producto.precio }}</td>
+            <td>{{ producto.stock }}</td>
+            <td>{{ producto.estado }}</td>
+            <td>{{ producto.id_categoria }}</td>
+          </tr>
+        </tbody>
+      </table>
     </div>
 
     <div v-else class="no-productos">
-      No hay productos disponibles.
+      <br>
+      <br>
+      <br>
+      <br>
+      <br>
+      <v-progress-circular indeterminate :size="58" :width="8"></v-progress-circular>
     </div>
   </div>
+
+  <v-dialog v-model="dialogEditar" max-width="500px">
+    <v-card variant="elevated" color="var(--surface-a40)">
+      <v-card-title>
+        <span class="headline">Editar Producto</span>
+      </v-card-title>
+      <v-card-text>
+        <v-form ref="formEditar">
+          <v-text-field label="Nombre" color="var(--primary-a0)" v-model="productoAEditar.nombre"></v-text-field>
+          <v-text-field label="Descripción" color="var(--primary-a0)" v-model="productoAEditar.descripcion"></v-text-field>
+          <v-text-field label="Precio Unitario" color="var(--primary-a0)" v-model="productoAEditar.precio"></v-text-field>
+          <v-text-field label="Stock" color="var(--primary-a0)" v-model="productoAEditar.stock"></v-text-field>
+          <v-text-field label="Estado" color="var(--primary-a0)" v-model="productoAEditar.estado"></v-text-field>
+        </v-form>
+      </v-card-text>
+      <v-card-actions>
+        <v-spacer></v-spacer>
+        <v-btn color="red darken-1" text @click="dialogEditar = false">Cancelar</v-btn>
+        <v-btn color="green darken-1" text @click="guardarEdicion">Guardar</v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
+
+  <v-dialog v-model="dialogCrear" max-width="500px">
+        <v-card variant="elevated" color="var(--surface-a40)">
+          <v-card-title>
+            <span class="headline">Agregar Producto</span>
+          </v-card-title>
+          <v-card-text>
+            <v-form ref="formEditar">
+          <v-text-field label="Nombre" color="var(--primary-a0)" v-model="newProducto.nombre"></v-text-field>
+          <v-text-field label="Descripción" color="var(--primary-a0)" v-model="newProducto.descripcion"></v-text-field>
+          <v-text-field label="Precio Unitario" color="var(--primary-a0)" v-model="newProducto.precio"></v-text-field>
+          <v-text-field label="Stock" color="var(--primary-a0)" v-model="newProducto.stock"></v-text-field>
+          <v-text-field label="Estado" color="var(--primary-a0)" v-model="newProducto.estado"></v-text-field>
+          <v-text-field label="ID de Categoría" color="var(--primary-a0)" v-model="newProducto.id_categoria"></v-text-field>
+        </v-form>
+          </v-card-text>
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn color="red darken-1" text @click="dialogCrear = false">Cancelar</v-btn>
+            <v-btn color="green darken-1" text @click="guardarCreacion">Crear</v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
+
 </template>
 
 <script>
-import Header from "@/components/Header.vue";
+import { useRouter } from "vue-router";
+import { useProductoService } from "~/services/productoService";
+import Header from "@/components/Header.vue"; // Ajusta la ruta según tu estructura de archivos
 
 export default {
+  name: "Productos",
   components: {
     Header,
   },
   data() {
     return {
-      productos: [
-        { id_producto: 1, nombre: "Producto 1", descripcion: "Descripción Producto 1", precio: "$100", stock: "1" },
-        { id_producto: 2, nombre: "Producto 2", descripcion: "Descripción Producto 2", precio: "$150", stock: "5" },
-        { id_producto: 3, nombre: "Producto 3", descripcion: "Descripción Producto 3", precio: "$200", stock: "22" },
-        { id_producto: 4, nombre: "Producto 4", descripcion: "Descripción Producto 4", precio: "$250", stock: "3" },
-        { id_producto: 5, nombre: "Producto 5", descripcion: "Descripción Producto 5", precio: "$300", stock: "10" },
-        { id_producto: 5, nombre: "Producto 5", descripcion: "Descripción Producto 5", precio: "$300", stock: "10" },
-        { id_producto: 5, nombre: "Producto 5", descripcion: "Descripción Producto 5", precio: "$300", stock: "10" },
-        { id_producto: 5, nombre: "Producto 5", descripcion: "Descripción Producto 5", precio: "$300", stock: "10" },
-        { id_producto: 5, nombre: "Producto 5", descripcion: "Descripción Producto 5", precio: "$300", stock: "10" },
-        { id_producto: 5, nombre: "Producto 5", descripcion: "Descripción Producto 5", precio: "$300", stock: "10" },
-        { id_producto: 5, nombre: "Producto 5", descripcion: "Descripción Producto 5", precio: "$300", stock: "10" },
-        { id_producto: 5, nombre: "Producto 5", descripcion: "Descripción Producto 5", precio: "$300", stock: "10" },
-        { id_producto: 5, nombre: "Producto 5", descripcion: "Descripción Producto 5", precio: "$300", stock: "10" },
-        { id_producto: 5, nombre: "Producto 5", descripcion: "Descripción Producto 5", precio: "$300", stock: "10" },
-        { id_producto: 5, nombre: "Producto 5", descripcion: "Descripción Producto 5", precio: "$300", stock: "10" },
-        { id_producto: 5, nombre: "Producto 5", descripcion: "Descripción Producto 5", precio: "$300", stock: "10" },
-        { id_producto: 5, nombre: "Producto 5", descripcion: "Descripción Producto 5", precio: "$300", stock: "10" },
-        { id_producto: 5, nombre: "Producto 5", descripcion: "Descripción Producto 5", precio: "$300", stock: "10" },
-        { id_producto: 5, nombre: "Producto 5", descripcion: "Descripción Producto 5", precio: "$300", stock: "10" },
-        { id_producto: 5, nombre: "Producto 5", descripcion: "Descripción Producto 5", precio: "$300", stock: "10" },
-        { id_producto: 5, nombre: "Producto 5", descripcion: "Descripción Producto 5", precio: "$300", stock: "10" },
-        { id_producto: 5, nombre: "Producto 5", descripcion: "Descripción Producto 5", precio: "$300", stock: "10" },
-        { id_producto: 5, nombre: "Producto 5", descripcion: "Descripción Producto 5", precio: "$300", stock: "10" },
-        { id_producto: 5, nombre: "Producto 5", descripcion: "Descripción Producto 5", precio: "$300", stock: "10" },
-        { id_producto: 5, nombre: "Producto 5", descripcion: "Descripción Producto 5", precio: "$300", stock: "10" },
-      ],
+      productos: [],
+      loading: true,
+      newProducto: {
+        id_producto: null,
+        nombre: "",
+        descripcion: "",
+        precio: null,
+        stock: null,
+        estado: "",
+        id_categoria: null,
+      },
+      accesToken: null,
+      searchParams: {
+        id_producto: null,
+        nombre: "",
+        descripcion: "",
+        precio: null,
+        stock: null,
+        estado: "",
+        id_categoria: null,
+      },
+      id_usuario: null,
+      dialogEditar: false,
+      dialogCrear: false,
+      productoAEditar: null,
     };
   },
-  async mounted() {
-    try {
-      const response = await fetch("http://localhost:3000/productos");
-      const data = await response.json();
-      if (data && Array.isArray(data)) {
-        this.productos = data;
-      }
-    } catch (error) {
-      console.error("Error al cargar los productos:", error);
+  mounted() {
+    this.accesToken = localStorage.getItem("accessToken");
+    this.userId = parseInt(localStorage.getItem("id_usuario"), 10);
+
+    if (!this.accesToken || !this.userId) {
+      console.error("--- Token de refresco o ID de usuario no disponibles");
+      window.location.href = "/";
+      return;
     }
+    this.fetchProductos();
+  },
+  methods: {
+    async fetchProductos() {
+      //this.loading = true;
+      try {
+        const { getAllProductos } = useProductoService();
+        const response = await getAllProductos();
+        this.productos = response;
+        console.log("Productos:", this.productos);
+      } catch (error) {
+        console.error("Error al obtener los productos:", error);
+      }
+    },
+    async deleteProductoById(id_producto) {
+      const isConfirmed = window.confirm("¿Está seguro de eliminar el producto?");
+      if (!isConfirmed) {
+        return;
+      }
+
+      try {
+        const productoService = useProductoService();
+        await productoService.deleteProductoById(id_producto);
+        console.log("Producto eliminado en el backend.");
+
+        const index = this.productos.findIndex((t) => t.id_producto === id_producto);
+        if (index !== -1) {
+          this.productos.splice(index, 1);
+        }
+      } catch (error) {
+        console.error("Error al eliminar el producto:", error);
+      }
+    },
+    updateProducto(producto) {
+      this.productoAEditar = { ...producto };
+      this.dialogEditar = true;
+    },
+    async guardarEdicion() {
+      try {
+        const productoService = useProductoService();
+        await productoService.updateProducto(this.productoAEditar);
+
+        const index = this.productos.findIndex( t => t.id_producto === this.productoAEditar.id_producto);       
+        if (index !== -1) {
+          this.productos.splice(index, 1, this.productoAEditar);
+        }
+        this.dialogEditar = false;
+      } catch (error) {
+        console.error("Error al guardar la edición:", error);
+      }
+    },
+    async guardarCreacion(){
+      try {
+        const productoService = useProductoService();
+        this.newProducto.id_producto = parseInt(this.newProducto.id_producto, 10);
+        this.newProducto.precio = parseFloat(this.newProducto.precio);
+        this.newProducto.stock = parseInt(this.newProducto.stock, 10);
+        this.newProducto.id_categoria = parseInt(this.newProducto.id_categoria, 10);
+        const response = await productoService.createProducto(this.newProducto);
+        console.log("Producto creado:", response);
+        this.productos.push(response);
+        this.dialogCrear = false;
+      } catch (error) {
+        console.error("Error al crear el producto:", error);
+      }
+    },
+    irAAñadir() {
+      this.dialogCrear = true;
+      console.log('Añadir producto');
+    },
   },
 };
 </script>
 
 <style scoped>
+
+.v-card {
+  color: white; /* Cambia este color según lo que necesites */
+}
 .background {
   background-color: #282828;
   min-height: 100vh;
@@ -248,41 +373,58 @@ header h1 {
 /* Tabla */
 /* Contenedor de la tabla */
 .table-container {
-  max-width: 1200px; /* Define un ancho máximo para el contenedor */
-  margin: 20px auto; /* Centra el contenedor en la página */
-  padding: 20px; /* Espaciado interno */
-  border: 1px solid #ccc; /* Borde del contenedor */
-  border-radius: 8px; /* Esquinas redondeadas */
-  background-color: var(--surface-a60); /* Fondo del contenedor */
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Sombra para darle relieve */
-  color: #f0f0f0; /* Color de texto */
+  max-width: 1200px;
+  /* Define un ancho máximo para el contenedor */
+  margin: 20px auto;
+  /* Centra el contenedor en la página */
+  padding: 20px;
+  /* Espaciado interno */
+  border: 1px solid #ccc;
+  /* Borde del contenedor */
+  border-radius: 8px;
+  /* Esquinas redondeadas */
+  background-color: var(--surface-a60);
+  /* Fondo del contenedor */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  /* Sombra para darle relieve */
+  color: #f0f0f0;
+  /* Color de texto */
 }
 
 /* Tabla */
 .invoice-table {
-  width: 100%; /* La tabla ocupa todo el ancho del contenedor */
-  border-collapse: collapse; /* Bordes colapsados */
-  font-family: 'Roboto', sans-serif; /* Fuente */
+  width: 100%;
+  /* La tabla ocupa todo el ancho del contenedor */
+  border-collapse: collapse;
+  /* Bordes colapsados */
+  font-family: 'Roboto', sans-serif;
+  /* Fuente */
 }
 
 /* Estilos de celdas y encabezados */
 .invoice-table th,
 .invoice-table td {
-  padding: 10px; /* Espaciado interno */
-  text-align: left; /* Alineación del texto */
-  border: 1px solid #ddd; /* Bordes de las celdas */
+  padding: 10px;
+  /* Espaciado interno */
+  text-align: left;
+  /* Alineación del texto */
+  border: 1px solid #ddd;
+  /* Bordes de las celdas */
 }
 
 /* Encabezados */
 .invoice-table th {
-  background-color: var(--primary-a0); /* Fondo azul para encabezados */
-  color: white; /* Texto blanco */
+  background-color: var(--primary-a0);
+  /* Fondo azul para encabezados */
+  color: white;
+  /* Texto blanco */
   font-weight: bold;
 }
 
 /* Filas alternadas */
 .invoice-table tr:nth-child(even) {
-  background-color: var(--surface-a20); /* Fondo gris claro para filas pares */
+  background-color: var(--surface-a20);
+  /* Fondo gris claro para filas pares */
 }
 
 
