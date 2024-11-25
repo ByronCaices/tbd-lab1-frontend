@@ -1,5 +1,5 @@
 export interface usuarioActivo{
-    usuario: string;
+    id_registro: number;
     totalQuieries: number;
 
 }

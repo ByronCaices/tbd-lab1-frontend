@@ -14,15 +14,12 @@ export const useAuditService = () => {
         return data;
     };
 
-    const obtenerClientesMultiplesCompras = async (fechaInicio: string, fechaFin: string, token: string): Promise<clienteMultiCompras[]> => {
-        const { data } = await $axiosService.get<clienteMultiCompras[]>("/api/auditoria/clientesMultiplesCompras", {
+    const obtenerClientesMultiplesCompras = async (token: string): Promise<clienteMultiCompras> => {
+        const { data } = await $axiosService.get<clienteMultiCompras>("/api/auditoria/clientesMultiplesCompras", {
             headers: {
                 Authorization: `Bearer ${token}`
             },
-            params: {
-                fechaInicio,
-                fechaFin
-            }
+           
         });
         return data;
     };
