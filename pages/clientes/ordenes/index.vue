@@ -1,44 +1,51 @@
 <template>
-    <Header />
-    <div class="background">
-        <div class="titulo-boton">
-            <div class="lexend-deca-title" style="font-size: 50px; color: var(--mixed-a100)">Lista de ordenes</div>
-            <div class="boton-orden">
-                <v-btn color="var(--primary-a0)" size="small" variant="tonal" class="boton-chico">
-                    Añadir orden
-                </v-btn>
-            </div>
-        </div>
-        <div class="ordenes">
-            <v-list>
-                <v-list-item v-for="orden in ordenes" :key="orden.id" cols="12" sm="6" md="4" lg="3">
-                    <v-card class="ma-3" outlined>
-                        <div class="d-flex justify-between align-center py-3 pl-3">
-                            <div class="d-flex flex-column">
-                                <div class="font-weight-bold mb-1">{{ orden.fecha }}</div>
-                                <div>{{ orden.estado }}</div>
-                                <div>{{ orden.nombre_cliente }}</div>
-                                <div>{{ orden.precio }}</div>
-                            </div>
-                            <v-spacer></v-spacer>
-                        </div>
-                        <v-divider></v-divider>
-                        <div class="boton-editar-eliminar d-flex justify-between mt-4 py-3">
-                            <v-btn class="mx-2 px-4" color="var(--surface-a100)" size="small" outlined @click="completarTarea(index)">
-                                Completar tarea
-                            </v-btn>
-                            <v-btn class="mx-2 px-4" color="#E29818FF" size="small" outlined @click="editarTarea(index)">
-                                Editar tarea
-                            </v-btn>
-                            <v-btn class="mx-2" color="red darken-1" size="small" outlined @click="eliminarTarea(index)">
-                                Eliminar tarea
-                            </v-btn>
-                        </div>
-                    </v-card>
-                </v-list-item>
-            </v-list>
-        </div>
+  <Header />
+  <div class="background">
+
+    <h1 class="lexend-deca-title">ORDENES</h1>
+
+    <!-- Botón para añadir órdenes -->
+    <div class="boton-clientes">
+      <v-btn color="#e29818ff" size="small" variant="tonal" class="boton-chico" @click="irAAñadir">
+        Añadir Orden
+      </v-btn>
     </div>
+
+    <br>
+
+    <div class="table-container" v-if="ordenes && ordenes.length > 0">
+      <table class="invoice-table">
+        <thead>
+          <tr>
+            <th>Editar</th>
+            <th>ID Orden</th>
+            <th>Fecha</th>
+            <th>Estado</th>
+            <th>Nombre Cliente</th>
+            <th>Precio</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="(orden, index) in ordenes" :key="index">
+            <td>
+              <button id="btnToWatch" class="btn new-btn" @click="goToWatch(orden.id_orden)">
+                ✏️
+              </button>
+            </td>
+            <td>{{ orden.id_orden }}</td>
+            <td>{{ orden.fecha }}</td>
+            <td>{{ orden.estado }}</td>
+            <td>{{ orden.nombre_cliente }}</td>
+            <td>{{ orden.precio }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div v-else class="no-productos">
+      No hay órdenes disponibles.
+    </div>
+  </div>
 </template>
 
 <script>
@@ -51,21 +58,29 @@ export default {
   data() {
     return {
       ordenes: [
-        { id: 1, fecha: "13-11-2024", estado: "Entregado", nombre_cliente:"AAAA", precio: "100.00"},
-        { id: 1, fecha: "13-11-2024", estado: "Entregado", nombre_cliente:"BBBB", precio: "100.00"}
+        { id_orden: 1, fecha: "13-11-2024", estado: "Entregado", nombre_cliente: "AAAA", precio: "100.00" },
+        { id_orden: 2, fecha: "14-11-2024", estado: "Pendiente", nombre_cliente: "BBBB", precio: "200.00" },
       ],
     };
   },
   async mounted() {
     try {
-      const response = await fetch("http://localhost:3000/productos");
+      const response = await fetch("http://localhost:3000/ordenes");
       const data = await response.json();
       if (data && Array.isArray(data)) {
         this.ordenes = data;
       }
     } catch (error) {
-      console.error("Error al cargar los productos:", error);
+      console.error("Error al cargar las órdenes:", error);
     }
+  },
+  methods: {
+    goToWatch(id) {
+      console.log(`Redirigiendo a la orden con ID: ${id}`);
+    },
+    irAAñadir() {
+      console.log("Redirigiendo a añadir orden...");
+    },
   },
 };
 </script>
@@ -73,20 +88,32 @@ export default {
 
 <style scoped>
 .background {
-  padding: 2rem;
+  background-color: #282828;
+  min-height: 100vh;
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  /* Centra horizontalmente */
+  justify-content: flex-start;
+  /* No centra verticalmente, coloca los elementos al inicio */
 }
 
-.ordenes {
-  background-color: var(--surface-a40); /* Un tono más claro que #282828 */
-  padding: 1rem;
-  border-radius: 8px;
+header h1 {
+  margin-left: 20px;
+  margin-top: 20px;
+  font-size: 2.25rem;
+  font-weight: bold;
+  text-transform: uppercase;
 }
 
-.v-card {
-  background-color: var( --surface-a60);
-  color: white; 
-  box-shadow: 1px 1px 5px 0px rgba(0,0,0,0.75);
-  border: 1px solid #444444; 
+.lexend-deca-title {
+  font-family: "Lexend Deca", sans-serif;
+  font-optical-sizing: auto;
+  color: var(--primary-a0);
+  font-weight: 700;
+  font-size: 4.25rem;
+  font-style: normal;
 }
 
 .boton-chico {
@@ -95,8 +122,166 @@ export default {
   min-width: 100px;
   text-transform: uppercase;
 }
+
 .titulo-boton {
-  text-align: center; 
+  text-align: center;
   padding: 2rem 0;
+}
+
+.boton-clientes {
+  display: flex;
+  justify-content: center;
+  margin-right: 20px;
+  margin-top: 20px;
+}
+
+.boton-productos {
+  padding: 1rem 0;
+}
+
+.lista-productos {
+  padding: 2rem;
+}
+
+.no-productos {
+  font-size: 1.5rem;
+  color: var(--primary-a100);
+  text-align: center;
+  padding: 2rem;
+}
+
+.info-producto {
+  background-color: var(--surface-a100);
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.v-btn {
+  border-radius: 4px;
+}
+
+#btnToWatch {
+  padding: 5px 10px;
+  margin-left: 10px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-bottom: 15px;
+  font-size: 18px;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
+}
+
+/* Contenedor de botones */
+.buttons-container {
+  margin-bottom: 20px;
+  padding-left: 15px;
+}
+
+/* Estilos base para los botones */
+.btn {
+  padding: 10px 15px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-right: 10px;
+  font-size: 14px;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
+  /* Transiciones suaves */
+}
+
+/* Botón "Nuevo" */
+.new-btn {
+  margin-top: 1rem;
+  background-color: var(--primary-a0);
+  color: white;
+}
+
+.new-btn:hover {
+  background-color: var(--primary-a0);
+  /* Color más oscuro al hacer hover */
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  /* Sombra para efecto de elevación */
+  transform: translateY(-2px);
+  /* Efecto de elevación */
+}
+
+.new-btn:active {
+  transform: translateY(1px);
+  /* Efecto de presión al hacer clic */
+}
+
+/* Botón "Subir" */
+.upload-btn {
+  background-color: #bfc9ca;
+  color: black;
+}
+
+.upload-btn:hover {
+  background-color: #a8b0b2;
+  /* Color más oscuro al hacer hover */
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  /* Sombra para efecto de elevación */
+  transform: translateY(-2px);
+  /* Efecto de elevación */
+}
+
+.upload-btn:active {
+  transform: translateY(1px);
+  /* Efecto de presión al hacer clic */
+}
+
+
+/* Tabla */
+/* Contenedor de la tabla */
+.table-container {
+  max-width: 1200px; /* Define un ancho máximo para el contenedor */
+  margin: 20px auto; /* Centra el contenedor en la página */
+  padding: 20px; /* Espaciado interno */
+  border: 1px solid #ccc; /* Borde del contenedor */
+  border-radius: 8px; /* Esquinas redondeadas */
+  background-color: var(--surface-a60); /* Fondo del contenedor */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Sombra para darle relieve */
+  color: #f0f0f0; /* Color de texto */
+}
+
+/* Tabla */
+.invoice-table {
+  width: 100%; /* La tabla ocupa todo el ancho del contenedor */
+  border-collapse: collapse; /* Bordes colapsados */
+  font-family: 'Roboto', sans-serif; /* Fuente */
+}
+
+/* Estilos de celdas y encabezados */
+.invoice-table th,
+.invoice-table td {
+  padding: 10px; /* Espaciado interno */
+  text-align: left; /* Alineación del texto */
+  border: 1px solid #ddd; /* Bordes de las celdas */
+}
+
+/* Encabezados */
+.invoice-table th {
+  background-color: var(--primary-a0); /* Fondo azul para encabezados */
+  color: white; /* Texto blanco */
+  font-weight: bold;
+}
+
+/* Filas alternadas */
+.invoice-table tr:nth-child(even) {
+  background-color: var(--surface-a20); /* Fondo gris claro para filas pares */
+}
+
+
+/* Estilos de estado */
+.status-draft {
+  background-color: #ccc;
+  padding: 5px;
+  border-radius: 4px;
+}
+
+.status-unpaid {
+  background-color: #f1c40f;
+  padding: 5px;
+  border-radius: 4px;
 }
 </style>
