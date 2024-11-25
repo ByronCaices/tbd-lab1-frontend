@@ -23,7 +23,12 @@
     </div>
 
     <div v-else class="no-productos">
-      No hay usuarios activos disponibles.
+      <br>
+      <br>
+      <br>
+      <br>
+      <br>
+      <v-progress-circular indeterminate :size="58" :width="8"></v-progress-circular>
     </div>
   </div>
 </template>
@@ -122,6 +127,13 @@ header h1 {
   justify-content: center;
   margin-right: 20px;
   margin-top: 20px;
+}
+
+.no-productos {
+  font-size: 1.5rem;
+  color: var(--primary-a100);
+  text-align: center;
+  padding: 2rem;
 }
 
 .boton-productos {
