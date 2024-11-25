@@ -15,7 +15,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr v-for="(object, index) in clientesMultiCompras.productos_comprados.split(',')" :key="index">
+        <tr v-for="(object, index) in formatList" :key="index">
           <td>{{ object }}</td>
 
         </tr>
@@ -49,6 +49,14 @@ export default {
       refreshToken: null,
       id_usuario: null,
     };
+  },
+  computed:{
+    formatList(){
+      if (this.clientesMultiCompras.length == 0 || !this.clientesMultiCompras.productos_comprados){
+        return [];
+      }
+      return this.clientesMultiCompras.productos_comprados.split(',');
+    }
   },
   mounted() {
     // Obtener valores del localStorage al montar el componente
