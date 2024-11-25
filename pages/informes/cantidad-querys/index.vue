@@ -38,7 +38,7 @@ export default {
   },
   data() {
     return {
-      usuariosActivos: [{id_registro: 1, total_queries: 10}, {id_registro: 2, total_queries: 20}],
+      usuariosActivos: [],
       accesToken: null,
       refreshToken: null,
       id_usuario: null,
