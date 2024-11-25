@@ -5,10 +5,10 @@
 			elevation="8"
 			max-width="448"
 			rounded="lg"
-			color=""
+			color="var(--primary-a0)"
 		>
 			<div class="text-center my-8">
-				<v-card flat class="elevation-6 pa-4" color="#FAE5C4ff" max-width="500">
+				<v-card flat class="elevation-6 pa-4" color="var(--surface-a40)" max-width="500">
 					<v-card-title class="text-h4 font-weight-bold text-uppercase">
 						Login
 						<svg-icon class="large-icon" type="mdi" :path="path"></svg-icon>
@@ -25,6 +25,7 @@
 					density="compact"
 					placeholder="ejemplo@correo.com"
 					prepend-inner-icon="mdi-email-outline"
+					color="green"
 					variant="outlined"
 					@keyup.enter="logueo"
 				></v-text-field>
@@ -41,6 +42,7 @@
 					:type="visible ? 'text' : 'password'"
 					density="compact"
 					placeholder="Ingresa la contraseña"
+					color="green"
 					prepend-inner-icon="mdi-lock-outline"
 					variant="outlined"
 					@click:append-inner="visible = !visible"
@@ -56,9 +58,9 @@
 				<!-- Botón de Ingreso -->
 				<v-btn
 					class="mb-8"
-					color="#e29818ff"
+					color="#f0f0f0"
 					size="large"
-					variant="tonal"
+					variant="outlined"
 					block
 					type="submit"
 				>
