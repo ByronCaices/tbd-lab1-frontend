@@ -47,7 +47,7 @@
 
     <div v-else class="no-productos">No hay órdenes disponibles.</div>
 
-    <v-dialog v-model="dialogCrear" max-width="500px">
+     <v-dialog v-model="dialogCrear" max-width="500px">
       <v-card variant="elevated" color="var(--surface-a40)">
         <v-card-title>
           <span class="headline">Crear Orden</span>
@@ -55,7 +55,20 @@
         <v-card-text>
           <v-form ref="formCrear">
             <v-text-field label="Fecha" color="var(--primary-a0)" v-model="nuevaOrden.fecha_orden" type="datetime-local"></v-text-field>
-            <v-select label="Cliente" color="var(--primary-a0)" v-model="nuevaOrden.id_cliente" :items="clientes" item-text="nombre" item-value="id_cliente"></v-select>
+            <v-select
+              label="Cliente"
+              color="var(--primary-a0)"
+              v-model="nuevaOrden.id_cliente"
+              :items="clientes"
+              item-value="id_cliente"
+            >
+              <template #item="{ item, props }">
+                <v-list-item v-bind="props" :title="item.raw.nombre"></v-list-item>
+              </template>
+              <template #selection="{ item }">
+                {{ item.nombre }}
+              </template>
+            </v-select>
             <v-select label="Estado" color="var(--primary-a0)" v-model="nuevaOrden.estado" :items="['Enviada', 'Pendiente', 'Pagada']"></v-select>
             <v-text-field label="Total" color="var(--primary-a0)" v-model="nuevaOrden.total" type="number"></v-text-field>
           </v-form>
