@@ -9,13 +9,13 @@
     <table class="invoice-table">
       <thead>
         <tr>
-          <th>Nombre Usuario</th>
+          <th>id Usuario</th>
           <th>Cantidad de Querys</th>
         </tr>
       </thead>
       <tbody>
         <tr v-for="(usuario, index) in usuariosActivos" :key="index">
-          <td>{{ usuario.usuario }}</td>
+          <td>{{ usuario.id_registro }}</td>
           <td>{{ usuario.total_queries }}</td>
         </tr>
       </tbody>
@@ -38,7 +38,7 @@ export default {
   },
   data() {
     return {
-      usuariosActivos: [{usuario: "Usuario 1", total_queries: 10}, {usuario: "Usuario 2", total_queries: 20}],
+      usuariosActivos: [{id_registro: 1, total_queries: 10}, {id_registro: 2, total_queries: 20}],
       accesToken: null,
       refreshToken: null,
       id_usuario: null,
@@ -66,6 +66,7 @@ export default {
         const { obtenerUsuariosMasActivos } = useAuditService();
         const response = await obtenerUsuariosMasActivos();
         this.usuariosActivos = response;
+        console.log("Usuarios activos cargados:", this.usuariosActivos);
       } catch (error) {
         console.error("Error al cargar los usuarios activos:", error);
       }
