@@ -12,35 +12,12 @@
           <li><a href="/productos">Productos</a></li>
           <li><a href="/clientes/ordenes">Ordenes</a></li>
           <li><a href="/clientes">Clientes</a></li>
-          <li><a href="#">Empleados</a></li>
           <li><a href="/informes">Informes</a></li>
-          <li><a href="#">Configuración</a></li>
         </ul>
       </nav>
     </div>
 
-    <div class="header-right">
-      <div class="search-bar" @click="toggleSearch">
-        <input v-if="searchActive" type="text" placeholder="Buscar..." ref="searchInput" class="search-input">
-        <button class="search-icon" v-else>
-          <img src="@/assets/magnifying-glass.png" alt="Buscar" class="icon-size">
-        </button>
-      </div>
-
-      <!-- Iconos y botones -->
-      <div class="header-icons">
-        <button class="btn-user" @click="toggleUserMenu">
-          <img src="@/assets/usuario.png">
-        </button>
-        <div v-if="userMenuActive" class="user-menu">
-          <ul>
-            <li><a href="#">Perfil</a></li>
-            <li><a href="#">Ajustes</a></li>
-            <li><a href="#">Cerrar sesión</a></li>
-          </ul>
-        </div>
-      </div>
-    </div>
+    
   </header>
 </template>
 
