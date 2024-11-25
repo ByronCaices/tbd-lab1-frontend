@@ -8,7 +8,7 @@ export const useProductoService = () => {
      * @returns - El producto creado en la base de datos.
      */
     const createProducto = async (producto: Producto): Promise<Producto> => {
-        const { data } = await $axiosService.post('/productos', producto);
+        const { data } = await $axiosService.post('/api/productos/', producto);
         return data;
     };
     /**
@@ -17,7 +17,7 @@ export const useProductoService = () => {
      * @returns - Una lista de todos los productos.
      */
     const getAllProductos = async (token: string): Promise<Producto[]> => {
-        const { data } = await $axiosService.get<Producto[]>('/productos', {
+        const { data } = await $axiosService.get<Producto[]>('/api/productos/', {
             headers: {
                 Authorization: `Bearer ${token}`
             }
@@ -32,7 +32,7 @@ export const useProductoService = () => {
      */
     const getProductoById = async (id: number, token: string): Promise<Producto> => {
         try {
-            const { data } = await $axiosService.get<Producto>(`/productos/id-producto/${id}`, {
+            const { data } = await $axiosService.get<Producto>(`/api/productos/id-producto/${id}`, {
                 headers: {
                     Authorization: `Bearer ${token}`
                 }
@@ -50,7 +50,7 @@ export const useProductoService = () => {
      * @returns - El producto actualizado.
      */
     const updateProducto = async (producto: Producto, token: string): Promise<Producto> => {
-        const { data } = await $axiosService.put<Producto>(`/productos/${producto.id_producto}`, producto, {
+        const { data } = await $axiosService.put<Producto>(`/api/productos/${producto.id_producto}`, producto, {
             headers: {
                 Authorization: `Bearer ${token}`
             }

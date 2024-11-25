@@ -1,92 +1,71 @@
-import { useNuxtApp } from '#app';
-import type { DetalleOrden } from '@/models/detalleOrden';
+import { useNuxtApp } from "#app";
+import type { Orden } from "@/models/orden";
 
 export const useOrdenService = () => {
     const { $axiosService } = useNuxtApp();
 
     /**
-     * Crea una nueva orden de detalle.
-     * @param detalleOrden - Detalle de la orden a crear.
-     * @returns El detalle de la orden creada.
+     * Crea una nueva orden.
+     * @param orden - Objeto Orden a crear.
+     * @returns La Orden creada.
      */
-    const createDetalleOrden = async (detalleOrden: DetalleOrden): Promise<DetalleOrden> => {
-        const { data } = await $axiosService.post('/ordenes/', detalleOrden);
+    const createOrden = async (orden: Orden): Promise<Orden> => {
+        const { data } = await $axiosService.post<Orden>("/api/ordenes/", orden);
         return data;
     };
 
     /**
-     * Obtiene un detalle de la orden por su ID.
-     * @param id - ID del detalle de la orden.
-     * @param token - Token de autenticación.
-     * @returns El detalle de la orden.
+     * Obtiene una orden por su ID.
+     * @param id - ID de la orden.
+     * @returns La Orden correspondiente.
      */
-    const getDetalleOrdenById = async (id: number, token: string): Promise<DetalleOrden> => {
+    const getOrdenById = async (id: number): Promise<Orden> => {
         try {
-            const { data } = await $axiosService.get<DetalleOrden>(`/ordenes/id-orden/${id}`, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            });
+            const { data } = await $axiosService.get<Orden>(`/api/ordenes/id-orden/${id}`);
             return data;
         } catch (error) {
-            console.error('Error obteniendo el detalle de la orden:', error);
+            console.error(error);
             throw error;
         }
     };
 
     /**
-     * Obtiene todos los detalles de las ordenes.
-     * @param token - Token de autenticación.
-     * @returns Una lista de todos los detalles de las ordenes.
+     * Obtiene todas las órdenes.
+     * @returns Una lista de Órdenes.
      */
-    const getAllDetalleOrdenes = async (token: string): Promise<DetalleOrden[]> => {
-        const { data } = await $axiosService.get<DetalleOrden[]>('/ordenes/', {
-            headers: {
-                Authorization: `Bearer ${token}`,
-            },
-        });
-        return data;
-    };
-
-    /**
-     * Actualiza un detalle de orden.
-     * @param detalleOrden - El detalle la orden que se actualizará.
-     * @param token - Token de autenticación.
-     * @returns El detalle de la orden actualizado.
-     */
-    const updateDetalleOrden = async (detalleOrden: DetalleOrden, token: string): Promise<DetalleOrden> => {
-        const { data } = await $axiosService.put<DetalleOrden>(`/ordenes/`, detalleOrden, {
-            headers: {
-                Authorization: `Bearer ${token}`,
-            },
-        });
-        return data;
-    };
-
-    /**
-     * Elimina un detalle de la orden por su ID.
-     * @param id - ID de la orden a eliminar.
-     * @param token - Token de autenticación.
-     * @returns - Eliminación de la orden.
-     */
-    const deleteDetalleOrdenById = async (id: number, token: string): Promise<void> => {
+    const getAllOrdenes = async (): Promise<Orden[]> => {
         try {
-            await $axiosService.delete(`/ordenes/delete-orden/${id}`, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            });
+            const { data } = await $axiosService.get<Orden[]>("/api/ordenes/");
+            return data;
         } catch (error) {
-            console.error('Error eliminando el detalle de la orden:', error);
+            console.error(error);
             throw error;
         }
+    };
+
+    /**
+     * Actualiza una orden existente.
+     * @param orden - Objeto Orden con datos actualizados.
+     * @returns La Orden actualizada.
+     */
+    const updateOrden = async (orden: Orden): Promise<Orden> => {
+        const { data } = await $axiosService.put<Orden>("/api/ordenes/", orden);
+        return data;
+    };
+
+    /**
+     * Elimina una orden por su ID.
+     * @param id - ID de la orden a eliminar.
+     */
+    const deleteOrden = async (id: number): Promise<void> => {
+        await $axiosService.delete(`/api/ordenes/delete-orden/${id}`);
     };
 
     return {
-        createDetalleOrden,
-        getDetalleOrdenById,
-        getAllDetalleOrdenes,
-        updateDetalleOrden,
-        deleteDetalleOrdenById,
+        createOrden,
+        getOrdenById,
+        getAllOrdenes,
+        updateOrden,
+        deleteOrden
     };
 };

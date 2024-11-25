@@ -41,93 +41,9 @@
 </template>
 
 <script>
-import { useRouter } from "vue-router";
+import Header from "@/components/Header.vue";
 import { useProductoService } from "~/services/productoService";
-import Header from "@/components/Header.vue"; // Ajusta la ruta según tu estructura de archivos
 
-export default {
-  name: "Productos",
-  components: {
-    Header,
-  },
-  data() {
-    return {
-      productos: [],
-      loading: true,
-      accesToken: null,
-      id_usuario: null,
-      dialogEditar: false,
-      productoAEditar: null,
-    };
-  },
-  mounted() {
-    this.accesToken = localStorage.getItem("accessToken");
-    this.userId = parseInt(localStorage.getItem("id_usuario"), 10);
-
-    if (!this.accesToken || !this.userId) {
-      console.error("--- Token de refresco o ID de usuario no disponibles");
-      window.location.href = "/";
-      return;
-    }
-    this.fetchProductos();
-  },
-  methods: {
-    async fetchProductos() {
-      this.loading = true;
-      try {
-        const { getAllProductos } = useProductoService();
-        const response = await getAllProductos();
-        this.productos = response;
-      } catch (error) {
-        console.error("Error al obtener los productos:", error);
-      } finally {
-        this.loading = false;
-      }
-    },
-    async deleteProductoById(id_producto) {
-      const isConfirmed = window.confirm("¿Está seguro de eliminar el producto?");
-      if (!isConfirmed) {
-        return;
-      }
-
-      try {
-        const productoService = useProductoService();
-        await productoService.deleteProductoById(id_producto);
-        console.log("Producto eliminado en el backend.");
-
-        const index = this.productos.findIndex((t) => t.id_producto === id_producto);
-        if (index !== -1) {
-          this.productos.splice(index, 1);
-        }
-      } catch (error) {
-        console.error("Error al eliminar el producto:", error);
-      }
-    },
-    updateProducto(producto) {
-      this.productoAEditar = { ...producto };
-      this.dialogEditar = true;
-    },
-    async guardarEdicion() {
-      try {
-        const productoService = useProductoService();
-        await productoService.updateProducto(this.productoAEditar);
-
-        const index = this.productos.findIndex(
-          (t) => t.id_producto === this.productoAEditar.id_producto
-        );
-        if (index !== -1) {
-          this.productos.splice(index, 1, this.productoAEditar);
-        }
-        this.dialogEditar = false;
-      } catch (error) {
-        console.error("Error al guardar la edición:", error);
-      }
-    },
-    irAAñadir() {
-      this.$router.push("/clientes/nuevo");
-    },
-  },
-};
 </script>
 
 <style scoped>

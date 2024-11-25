@@ -7,7 +7,7 @@
     <!-- Botón para añadir clientes -->
     <div class="boton-clientes">
       <v-btn color="#e29818ff" size="small" variant="tonal" class="boton-chico" @click="irAAñadir">
-        Añadir Cliente
+        Añadir Producto
       </v-btn>
     </div>
 
@@ -50,52 +50,98 @@
 
 <script>
 import Header from "@/components/Header.vue";
+import useProductoService from "@/services/productoService";
 
 export default {
+  name: "Productos",
   components: {
     Header,
   },
   data() {
     return {
-      productos: [
-        { id_producto: 1, nombre: "Producto 1", descripcion: "Descripción Producto 1", precio: "$100", stock: "1" },
-        { id_producto: 2, nombre: "Producto 2", descripcion: "Descripción Producto 2", precio: "$150", stock: "5" },
-        { id_producto: 3, nombre: "Producto 3", descripcion: "Descripción Producto 3", precio: "$200", stock: "22" },
-        { id_producto: 4, nombre: "Producto 4", descripcion: "Descripción Producto 4", precio: "$250", stock: "3" },
-        { id_producto: 5, nombre: "Producto 5", descripcion: "Descripción Producto 5", precio: "$300", stock: "10" },
-        { id_producto: 5, nombre: "Producto 5", descripcion: "Descripción Producto 5", precio: "$300", stock: "10" },
-        { id_producto: 5, nombre: "Producto 5", descripcion: "Descripción Producto 5", precio: "$300", stock: "10" },
-        { id_producto: 5, nombre: "Producto 5", descripcion: "Descripción Producto 5", precio: "$300", stock: "10" },
-        { id_producto: 5, nombre: "Producto 5", descripcion: "Descripción Producto 5", precio: "$300", stock: "10" },
-        { id_producto: 5, nombre: "Producto 5", descripcion: "Descripción Producto 5", precio: "$300", stock: "10" },
-        { id_producto: 5, nombre: "Producto 5", descripcion: "Descripción Producto 5", precio: "$300", stock: "10" },
-        { id_producto: 5, nombre: "Producto 5", descripcion: "Descripción Producto 5", precio: "$300", stock: "10" },
-        { id_producto: 5, nombre: "Producto 5", descripcion: "Descripción Producto 5", precio: "$300", stock: "10" },
-        { id_producto: 5, nombre: "Producto 5", descripcion: "Descripción Producto 5", precio: "$300", stock: "10" },
-        { id_producto: 5, nombre: "Producto 5", descripcion: "Descripción Producto 5", precio: "$300", stock: "10" },
-        { id_producto: 5, nombre: "Producto 5", descripcion: "Descripción Producto 5", precio: "$300", stock: "10" },
-        { id_producto: 5, nombre: "Producto 5", descripcion: "Descripción Producto 5", precio: "$300", stock: "10" },
-        { id_producto: 5, nombre: "Producto 5", descripcion: "Descripción Producto 5", precio: "$300", stock: "10" },
-        { id_producto: 5, nombre: "Producto 5", descripcion: "Descripción Producto 5", precio: "$300", stock: "10" },
-        { id_producto: 5, nombre: "Producto 5", descripcion: "Descripción Producto 5", precio: "$300", stock: "10" },
-        { id_producto: 5, nombre: "Producto 5", descripcion: "Descripción Producto 5", precio: "$300", stock: "10" },
-        { id_producto: 5, nombre: "Producto 5", descripcion: "Descripción Producto 5", precio: "$300", stock: "10" },
-        { id_producto: 5, nombre: "Producto 5", descripcion: "Descripción Producto 5", precio: "$300", stock: "10" },
-        { id_producto: 5, nombre: "Producto 5", descripcion: "Descripción Producto 5", precio: "$300", stock: "10" },
-        { id_producto: 5, nombre: "Producto 5", descripcion: "Descripción Producto 5", precio: "$300", stock: "10" },
-      ],
+      productos: [],
+      loading: true,
+      token: "your-token-here",
+      searchParams: {
+        id_producto: null,
+        nombre: "",
+        descripcion: "",
+        precio: "",
+        stock: "",
+        estado: "",
+        id_categoria: "",
+      },
+      refreshToken: null,
+      accesToken: null,
+      id_usuario: null,
+      dialogEditar: false,
+      productoAEditar: null,
+      menuFecha: false,
     };
   },
-  async mounted() {
-    try {
-      const response = await fetch("http://localhost:3000/productos");
-      const data = await response.json();
-      if (data && Array.isArray(data)) {
-        this.productos = data;
-      }
-    } catch (error) {
-      console.error("Error al cargar los productos:", error);
+  computed:{
+  },
+  mounted() {
+    this.accesToken = localStorage.getItem("accessToken");
+    this.userId = parseInt(localStorage.getItem("id_usuario"), 10);
+    if (!this.accesToken || !this.userId) {
+      console.error("--- Token de refresco o ID de usuario no disponibles");
+      window.location.href = "/";
+      return;
     }
+    this.fetchProductos();
+  },
+  methods: {
+    async fetchProductos() {
+      this.loading = true;
+      try {
+        const { getAllProductos } = useProductoService;
+        const response = await getAllProductos();
+        this.productos = response;
+      } catch (error) {
+        console.error("Error al cargar productos", error);
+      } finally {
+        this.loading = false;
+      }
+    },
+    async deleteProducto(id_producto) {
+      const isConfirmed = window.confirm("¿Estás seguro de eliminar el producto?");
+      if (!isConfirmed) {
+        return;
+      }
+      try {
+        const productoService = useProductoService();
+        await productoService.deleteProducto(id_producto);
+        console.log("Producto eliminado");
+        const index = this.productos.findIndex((producto) => producto.id_producto === id_producto);
+        if (index !== -1) {
+          console.log("Eliminando producto de la lista");
+          this.productos.splice(index, 1);
+          console.log("Productos actuales: ", this.productos);
+        }
+      } catch (error) {
+        console.error("Error al eliminar producto", error);
+      }
+    },
+    editarProducto(producto) {
+      this.productoAEditar = { ...producto };
+      this.dialogEditar = true;
+    },
+    async guardarEdicion() {
+      try {
+        const productoService = useProductoService();
+        await productoService.editProducto(this.productoAEditar);
+        const index = this.productos.findIndex(
+          (producto) => producto.id_producto === this.productoAEditar.id_producto
+        );
+        if (index !== -1) {
+          this.productos.splice(index, 1, this.productoAEditar);
+        }
+        this.dialogEditar = false;
+      } catch (error) {
+        console.error("Error al guardar edición", error);
+      }
+    },
   },
 };
 </script>
