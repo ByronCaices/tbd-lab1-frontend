@@ -8,7 +8,7 @@ export const useProductoService = () => {
      * @returns - El producto creado en la base de datos.
      */
     const createProducto = async (producto: Producto): Promise<Producto> => {
-        const { data } = await $axiosService.post('/api/productos', producto);
+        const { data } = await $axiosService.post('/api/productos/', producto);
         return data;
     };
     /**
@@ -44,7 +44,7 @@ export const useProductoService = () => {
      * @returns - El producto actualizado.
      */
     const updateProducto = async (producto: Producto): Promise<Producto> => {
-        const { data } = await $axiosService.put<Producto>(`/api/productos/${producto.id_producto}`);
+        const { data } = await $axiosService.put<Producto>("/api/productos/", producto);
         return data;
     };
 

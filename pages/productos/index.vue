@@ -7,7 +7,7 @@
     <!-- Botón para añadir clientes -->
     <div class="boton-clientes">
       <v-btn color="#e29818ff" size="small" variant="tonal" class="boton-chico" @click="irAAñadir">
-        Añadir Cliente
+        Añadir Producto
       </v-btn>
     </div>
 
@@ -29,7 +29,7 @@
         </thead>
         <tbody>
           <tr v-for="(producto, index) in productos" :key="index">
-            <td><button id="btnToWatch" class="btn new-btn" @click="goToWatch(producto.id_producto)">✏️</button></td>
+            <td><button id="btnToWatch" class="btn new-btn" @click="updateProducto(producto)">✏️</button></td>
             <td>{{ producto.id_producto }}</td>
             <td>{{ producto.nombre }} </td>
             <td>{{ producto.descripcion }}</td>
@@ -42,8 +42,6 @@
       </table>
     </div>
 
-    
-
     <div v-else class="no-productos">
       <br>
       <br>
@@ -53,6 +51,52 @@
       <v-progress-circular indeterminate :size="58" :width="8"></v-progress-circular>
     </div>
   </div>
+
+  <v-dialog v-model="dialogEditar" max-width="500px">
+    <v-card variant="elevated" color="var(--surface-a40)">
+      <v-card-title>
+        <span class="headline">Editar Producto</span>
+      </v-card-title>
+      <v-card-text>
+        <v-form ref="formEditar">
+          <v-text-field label="Nombre" color="var(--primary-a0)" v-model="productoAEditar.nombre"></v-text-field>
+          <v-text-field label="Descripción" color="var(--primary-a0)" v-model="productoAEditar.descripcion"></v-text-field>
+          <v-text-field label="Precio Unitario" color="var(--primary-a0)" v-model="productoAEditar.precio"></v-text-field>
+          <v-text-field label="Stock" color="var(--primary-a0)" v-model="productoAEditar.stock"></v-text-field>
+          <v-text-field label="Estado" color="var(--primary-a0)" v-model="productoAEditar.estado"></v-text-field>
+        </v-form>
+      </v-card-text>
+      <v-card-actions>
+        <v-spacer></v-spacer>
+        <v-btn color="red darken-1" text @click="dialogEditar = false">Cancelar</v-btn>
+        <v-btn color="green darken-1" text @click="guardarEdicion">Guardar</v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
+
+  <v-dialog v-model="dialogCrear" max-width="500px">
+        <v-card variant="elevated" color="var(--surface-a40)">
+          <v-card-title>
+            <span class="headline">Agregar Producto</span>
+          </v-card-title>
+          <v-card-text>
+            <v-form ref="formEditar">
+          <v-text-field label="Nombre" color="var(--primary-a0)" v-model="newProducto.nombre"></v-text-field>
+          <v-text-field label="Descripción" color="var(--primary-a0)" v-model="newProducto.descripcion"></v-text-field>
+          <v-text-field label="Precio Unitario" color="var(--primary-a0)" v-model="newProducto.precio"></v-text-field>
+          <v-text-field label="Stock" color="var(--primary-a0)" v-model="newProducto.stock"></v-text-field>
+          <v-text-field label="Estado" color="var(--primary-a0)" v-model="newProducto.estado"></v-text-field>
+          <v-text-field label="ID de Categoría" color="var(--primary-a0)" v-model="newProducto.id_categoria"></v-text-field>
+        </v-form>
+          </v-card-text>
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn color="red darken-1" text @click="dialogCrear = false">Cancelar</v-btn>
+            <v-btn color="green darken-1" text @click="guardarCreacion">Crear</v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
+
 </template>
 
 <script>
@@ -69,6 +113,15 @@ export default {
     return {
       productos: [],
       loading: true,
+      newProducto: {
+        id_producto: null,
+        nombre: "",
+        descripcion: "",
+        precio: null,
+        stock: null,
+        estado: "",
+        id_categoria: null,
+      },
       accesToken: null,
       searchParams: {
         id_producto: null,
@@ -81,6 +134,7 @@ export default {
       },
       id_usuario: null,
       dialogEditar: false,
+      dialogCrear: false,
       productoAEditar: null,
     };
   },
@@ -135,9 +189,7 @@ export default {
         const productoService = useProductoService();
         await productoService.updateProducto(this.productoAEditar);
 
-        const index = this.productos.findIndex(
-          (t) => t.id_producto === this.productoAEditar.id_producto
-        );
+        const index = this.productos.findIndex( t => t.id_producto === this.productoAEditar.id_producto);       
         if (index !== -1) {
           this.productos.splice(index, 1, this.productoAEditar);
         }
@@ -146,14 +198,34 @@ export default {
         console.error("Error al guardar la edición:", error);
       }
     },
+    async guardarCreacion(){
+      try {
+        const productoService = useProductoService();
+        this.newProducto.id_producto = parseInt(this.newProducto.id_producto, 10);
+        this.newProducto.precio = parseFloat(this.newProducto.precio);
+        this.newProducto.stock = parseInt(this.newProducto.stock, 10);
+        this.newProducto.id_categoria = parseInt(this.newProducto.id_categoria, 10);
+        const response = await productoService.createProducto(this.newProducto);
+        console.log("Producto creado:", response);
+        this.productos.push(response);
+        this.dialogCrear = false;
+      } catch (error) {
+        console.error("Error al crear el producto:", error);
+      }
+    },
     irAAñadir() {
-      this.$router.push("/clientes/nuevo");
+      this.dialogCrear = true;
+      console.log('Añadir producto');
     },
   },
 };
 </script>
 
 <style scoped>
+
+.v-card {
+  color: white; /* Cambia este color según lo que necesites */
+}
 .background {
   background-color: #282828;
   min-height: 100vh;
