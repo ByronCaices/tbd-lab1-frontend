@@ -11,6 +11,12 @@
       </v-btn>
     </div>
 
+    <div class="boton-clientes">
+      <v-btn color="#e29818ff" size="small" variant="tonal" class="boton-chico" @click="desactivarProductos">
+        Desactivar Productos Sin Stock
+      </v-btn>
+    </div>
+
     <br>
 
     <div class="table-container" v-if="productos && productos.length > 0">
@@ -216,6 +222,15 @@ export default {
     irAAñadir() {
       this.dialogCrear = true;
       console.log('Añadir producto');
+    },
+    async desactivarProductos(){
+      try {
+        const productoService = useProductoService();
+        await productoService.desactivarProductosSinStock();
+        this.fetchProductos();
+      } catch (error) {
+        console.error("Error al desactivar productos:", error);
+      }
     },
   },
 };
