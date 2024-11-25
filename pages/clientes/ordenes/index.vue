@@ -1,7 +1,6 @@
 <template>
   <Header />
   <div class="background">
-
     <h1 class="lexend-deca-title">ORDENES</h1>
 
     <!-- Botón para añadir órdenes -->
@@ -11,8 +10,9 @@
       </v-btn>
     </div>
 
-    <br>
+    <br />
 
+    <!-- Tabla de órdenes -->
     <div class="table-container" v-if="ordenes && ordenes.length > 0">
       <table class="invoice-table">
         <thead>
@@ -23,33 +23,64 @@
             <th>Estado</th>
             <th>Nombre Cliente</th>
             <th>Precio</th>
+            <th>Eliminar</th>
           </tr>
         </thead>
         <tbody>
           <tr v-for="(orden, index) in ordenes" :key="index">
             <td>
-              <button id="btnToWatch" class="btn new-btn" @click="goToWatch(orden.id_orden)">
+              <button class="btn new-btn" @click="editarOrden(orden)">
                 ✏️
               </button>
             </td>
             <td>{{ orden.id_orden }}</td>
-            <td>{{ orden.fecha }}</td>
+            <td>{{ orden.fecha_orden }}</td>
             <td>{{ orden.estado }}</td>
-            <td>{{ orden.nombre_cliente }}</td>
-            <td>{{ orden.precio }}</td>
+            <td>{{ getClienteNombre(orden.id_cliente) }}</td>
+            <td>{{ orden.total }}</td>
+            <td>
+              <button class="btn new-btn" @click="deleteOrden(orden.id_orden)">
+                🗑️
+              </button>
+            </td>
           </tr>
         </tbody>
       </table>
     </div>
 
-    <div v-else class="no-productos">
-      No hay órdenes disponibles.
-    </div>
+    <div v-else class="no-productos">No hay órdenes disponibles.</div>
+
+    <!-- Diálogo para editar órdenes -->
+    <v-dialog v-model="dialogEditar" max-width="500px">
+      <v-card>
+        <v-card-title>
+          <span class="headline">Editar Orden</span>
+        </v-card-title>
+        <v-card-text>
+          <v-form ref="formEditarOrden">
+            <v-text-field label="Fecha" v-model="ordenAEditar.fecha_orden"></v-text-field>
+            <v-select
+              label="Estado"
+              v-model="ordenAEditar.estado"
+              :items="['Pendiente', 'En proceso', 'Completada']"
+            ></v-select>
+            <v-text-field label="Precio" v-model="ordenAEditar.total"></v-text-field>
+          </v-form>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="red darken-1" text @click="dialogEditar = false">Cancelar</v-btn>
+          <v-btn color="green darken-1" text @click="guardarEdicionOrden">Guardar</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </div>
 </template>
 
 <script>
 import Header from "@/components/Header.vue";
+import { useOrdenService } from "@/services/ordenesService";
+import { useClienteService } from "@/services/clienteService";
 
 export default {
   components: {
@@ -57,34 +88,65 @@ export default {
   },
   data() {
     return {
-      ordenes: [
-        { id_orden: 1, fecha: "13-11-2024", estado: "Entregado", nombre_cliente: "AAAA", precio: "100.00" },
-        { id_orden: 2, fecha: "14-11-2024", estado: "Pendiente", nombre_cliente: "BBBB", precio: "200.00" },
-      ],
+      ordenes: [],
+      clientes: [],
+      dialogEditar: false,
+      ordenAEditar: null,
     };
   },
   async mounted() {
     try {
-      const response = await fetch("http://localhost:3000/ordenes");
-      const data = await response.json();
-      if (data && Array.isArray(data)) {
-        this.ordenes = data;
-      }
+      const ordenService = useOrdenService();
+      const clienteService = useClienteService();
+      this.ordenes = await ordenService.getAllOrdenes();
+      this.clientes = await clienteService.getAllClientes();
     } catch (error) {
       console.error("Error al cargar las órdenes:", error);
     }
   },
   methods: {
-    goToWatch(id) {
-      console.log(`Redirigiendo a la orden con ID: ${id}`);
-    },
     irAAñadir() {
       console.log("Redirigiendo a añadir orden...");
+      this.$router.push("/add-orden"); // Ajusta la ruta según tu configuración
+    },
+    getClienteNombre(id) {
+      const cliente = this.clientes.find((cliente) => cliente.id_cliente === id);
+      return cliente ? cliente.nombre : "Cliente no encontrado";
+    },
+    async deleteOrden(id) {
+      const isConfirmed = window.confirm("¿Estás seguro de eliminar la orden?");
+      if (!isConfirmed) {
+        return;
+      }
+      try {
+        const ordenService = useOrdenService();
+        await ordenService.deleteOrden(id);
+        this.ordenes = this.ordenes.filter((orden) => orden.id_orden !== id);
+      } catch (error) {
+        console.error("Error al eliminar la orden:", error);
+      }
+    },
+    editarOrden(orden) {
+      this.ordenAEditar = { ...orden }; // Clona el objeto para evitar modificarlo directamente
+      this.dialogEditar = true;
+    },
+    async guardarEdicionOrden() {
+      try {
+        const ordenService = useOrdenService();
+        await ordenService.updateOrden(this.ordenAEditar);
+        // Actualiza la lista de órdenes localmente
+        const index = this.ordenes.findIndex((o) => o.id_orden === this.ordenAEditar.id_orden);
+        if (index !== -1) {
+          this.$set(this.ordenes, index, this.ordenAEditar);
+        }
+        this.dialogEditar = false;
+      } catch (error) {
+        console.error("Error al guardar la edición de la orden:", error);
+      }
     },
   },
 };
 </script>
-
 
 <style scoped>
 .background {
