@@ -29,9 +29,7 @@
         <tbody>
           <tr v-for="(orden, index) in ordenes" :key="index">
             <td>
-              <button class="btn new-btn" @click="editarOrden(orden)">
-                ✏️
-              </button>
+              <button class="btn new-btn" @click="editarOrden(orden)">✏️</button>
             </td>
             <td>{{ orden.id_orden }}</td>
             <td>{{ orden.fecha_orden }}</td>
@@ -39,9 +37,8 @@
             <td>{{ getClienteNombre(orden.id_cliente) }}</td>
             <td>{{ orden.total }}</td>
             <td>
-              <button class="btn new-btn" @click="deleteOrden(orden.id_orden)">
-                🗑️
-              </button>
+              <button class="btn new-btn" @click="deleteOrden(orden.id_orden)">🗑️</button>
+              <button class="btn new-btn" @click=""><v-icon>mdi-eye</v-icon></button>
             </td>
           </tr>
         </tbody>
@@ -50,30 +47,47 @@
 
     <div v-else class="no-productos">No hay órdenes disponibles.</div>
 
-    <!-- Diálogo para editar órdenes -->
-    <v-dialog v-model="dialogEditar" max-width="500px">
-      <v-card>
+    <v-dialog v-model="dialogCrear" max-width="500px">
+      <v-card variant="elevated" color="var(--surface-a40)">
         <v-card-title>
-          <span class="headline">Editar Orden</span>
+          <span class="headline">Crear Orden</span>
         </v-card-title>
         <v-card-text>
-          <v-form ref="formEditarOrden">
-            <v-text-field label="Fecha" v-model="ordenAEditar.fecha_orden"></v-text-field>
-            <v-select
-              label="Estado"
-              v-model="ordenAEditar.estado"
-              :items="['Pendiente', 'En proceso', 'Completada']"
-            ></v-select>
-            <v-text-field label="Precio" v-model="ordenAEditar.total"></v-text-field>
+          <v-form ref="formCrear">
+            <v-text-field label="Fecha" color="var(--primary-a0)" v-model="nuevaOrden.fecha_orden" type="datetime-local"></v-text-field>
+            <v-select label="Cliente" color="var(--primary-a0)" v-model="nuevaOrden.id_cliente" :items="clientes" item-text="nombre" item-value="id_cliente"></v-select>
+            <v-select label="Estado" color="var(--primary-a0)" v-model="nuevaOrden.estado" :items="['Enviada', 'Pendiente', 'Pagada']"></v-select>
+            <v-text-field label="Total" color="var(--primary-a0)" v-model="nuevaOrden.total" type="number"></v-text-field>
           </v-form>
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn color="red darken-1" text @click="dialogEditar = false">Cancelar</v-btn>
-          <v-btn color="green darken-1" text @click="guardarEdicionOrden">Guardar</v-btn>
+          <v-btn color="red darken-1" text @click="dialogCrear = false">Cancelar</v-btn>
+          <v-btn color="green darken-1" text @click="guardarCreacion">Crear</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
+
+    <v-dialog v-model="dialogEditar" max-width="500px">
+        <v-card variant="elevated" color="var(--surface-a40)">
+          <v-card-title>
+            <span class="headline">Editar Orden</span>
+          </v-card-title>
+          <v-card-text>
+            <v-form ref="formEditar">
+          <v-text-field label="Fecha" color="var(--primary-a0)" v-model="ordenAEditar.fecha_orden" type="datetime-local"></v-text-field>
+          <v-select label="Estado" color="var(--primary-a0)" v-model="ordenAEditar.estado":items="['Enviada', 'Pendiente', 'Pagada']"></v-select>
+          <v-text-field label="Total" color="var(--primary-a0)" v-model="ordenAEditar.total"></v-text-field>
+        </v-form>
+          </v-card-text>
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn color="red darken-1" text @click="dialogEditar = false">Cancelar</v-btn>
+            <v-btn color="green darken-1" text @click="guardarEdicion">Editar</v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
+
   </div>
 </template>
 
@@ -91,7 +105,15 @@ export default {
       ordenes: [],
       clientes: [],
       dialogEditar: false,
+      dialogCrear: false,
       ordenAEditar: null,
+      nuevaOrden: {
+        id_orden: null,
+        fecha_orden: "",
+        estado: "",
+        id_cliente: null,
+        total: "",
+      },
     };
   },
   async mounted() {
@@ -100,48 +122,76 @@ export default {
       const clienteService = useClienteService();
       this.ordenes = await ordenService.getAllOrdenes();
       this.clientes = await clienteService.getAllClientes();
+      this.ordenes.sort((a, b) => a.id_orden - b.id_orden);
+      console.log(this.clientes);
     } catch (error) {
       console.error("Error al cargar las órdenes:", error);
     }
   },
   methods: {
     irAAñadir() {
-      console.log("Redirigiendo a añadir orden...");
-      this.$router.push("/add-orden"); // Ajusta la ruta según tu configuración
+      this.dialogCrear = true;
     },
     getClienteNombre(id) {
       const cliente = this.clientes.find((cliente) => cliente.id_cliente === id);
-      return cliente ? cliente.nombre : "Cliente no encontrado";
+      return cliente ? cliente.nombre : "Desconocido";
     },
-    async deleteOrden(id) {
-      const isConfirmed = window.confirm("¿Estás seguro de eliminar la orden?");
-      if (!isConfirmed) {
-        return;
-      }
+    async guardarNuevaOrden() {
       try {
         const ordenService = useOrdenService();
-        await ordenService.deleteOrden(id);
-        this.ordenes = this.ordenes.filter((orden) => orden.id_orden !== id);
+        const nuevaOrden = await ordenService.createOrden(this.nuevaOrden);
+        this.ordenes.push(nuevaOrden);
+        this.dialogCrear = false;
       } catch (error) {
-        console.error("Error al eliminar la orden:", error);
+        console.error("Error al guardar la nueva orden:", error);
       }
     },
     editarOrden(orden) {
-      this.ordenAEditar = { ...orden }; // Clona el objeto para evitar modificarlo directamente
+      this.ordenAEditar = { ...orden };
       this.dialogEditar = true;
     },
-    async guardarEdicionOrden() {
+    async guardarEdicion() {
       try {
         const ordenService = useOrdenService();
         await ordenService.updateOrden(this.ordenAEditar);
-        // Actualiza la lista de órdenes localmente
         const index = this.ordenes.findIndex((o) => o.id_orden === this.ordenAEditar.id_orden);
         if (index !== -1) {
-          this.$set(this.ordenes, index, this.ordenAEditar);
+          this.ordenes.splice(index, 1, this.ordenAEditar);
         }
         this.dialogEditar = false;
       } catch (error) {
         console.error("Error al guardar la edición de la orden:", error);
+      }
+    },
+    async deleteOrden(id_orden) {
+      const isConfirmed = window.confirm("¿Estás seguro de eliminar esta orden?");
+      if (!isConfirmed) return;
+
+      try {
+        const ordenService = useOrdenService();
+        await ordenService.deleteOrden(id_orden);
+        this.ordenes = this.ordenes.filter((orden) => orden.id_orden !== id_orden);
+      } catch (error) {
+        console.error("Error al eliminar la orden:", error);
+      }
+    },
+    async guardarCreacion() {
+      try {
+        const ordenService = useOrdenService();
+        
+        if (!this.nuevaOrden.fecha_orden || !this.nuevaOrden.id_cliente || !this.nuevaOrden.estado || !this.nuevaOrden.total) {
+          alert('Todos los campos son obligatorios');
+          return;
+        }
+        
+        this.nuevaOrden.total = parseFloat(this.nuevaOrden.total);
+        const nuevaOrden = await ordenService.createOrden(this.nuevaOrden);
+        
+        this.ordenes.push(nuevaOrden);
+        
+        this.dialogCrear = false;
+      } catch (error) {
+        console.error("Error al crear la orden:", error);
       }
     },
   },
