@@ -38,14 +38,21 @@
             <td>{{ orden.total }}</td>
             <td>
               <button class="btn new-btn" @click="deleteOrden(orden.id_orden)">🗑️</button>
-              <button class="btn new-btn" @click=""><v-icon>mdi-eye</v-icon></button>
+              <button class="btn new-btn" @click="goToOrden(orden.id_orden)"><v-icon>mdi-eye</v-icon></button>
             </td>
           </tr>
         </tbody>
       </table>
     </div>
 
-    <div v-else class="no-productos">No hay órdenes disponibles.</div>
+    <div v-else class="no-productos">
+      <br>
+      <br>
+      <br>
+      <br>
+      <br>
+      <v-progress-circular indeterminate :size="58" :width="8"></v-progress-circular>
+    </div>
 
      <v-dialog v-model="dialogCrear" max-width="500px">
       <v-card variant="elevated" color="var(--surface-a40)">
@@ -206,6 +213,9 @@ export default {
       } catch (error) {
         console.error("Error al crear la orden:", error);
       }
+    },
+    goToOrden(id_orden) {
+      this.$router.push(`/clientes/ordenes/${id_orden}`);
     },
   },
 };
